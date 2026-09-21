@@ -1,0 +1,40 @@
+ja:
+  date:
+    formats:
+      default: "%Y年%-m月%-d日"
+  time:
+    formats:
+      default: "%Y年%-m月%-d日 %H:%M"
+  errors:
+    format: "%{attribute}%{message}"
+    messages:
+      blank: "を入力してください"
+      not_a_number: "は数値で入力してください"
+      not_an_integer: "は整数で入力してください"
+      greater_than_or_equal_to: "は%{count}以上で入力してください"
+      less_than_or_equal_to: "は%{count}以下で入力してください"
+      less_than: "は%{count}未満で入力してください"
+      inclusion: "を選択してください"
+      taken: "はすでに登録されています"
+      invalid: "が正しくありません"
+      required: "を指定してください"
+  activerecord:
+    attributes:
+      condition_log:
+        recorded_at: "記録時刻"
+        headache: "頭痛"
+        nausea: "気持ち悪さ"
+        fatigue: "だるさ"
+        appetite: "食欲"
+        clarity: "頭のクリアさ"
+      daily_log:
+        date: "日付"
+        wakeup_freshness: "朝のすっきり感"
+        sleep_minutes: "睡眠時間"
+        sleep_hours: "睡眠時間（時間）"
+        sleep_remainder_minutes: "睡眠時間（分）"
+        screen_minutes: "画面時間"
+        screen_hours: "画面時間（時間）"
+        screen_remainder_minutes: "画面時間（分）"
+        steps: "歩数"
+        drank_alcohol: "飲酒の有無"

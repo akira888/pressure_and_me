@@ -1,4 +1,6 @@
 class ConditionLog < ApplicationRecord
+  SCORES = %i[headache nausea fatigue appetite clarity].freeze
+
   belongs_to :user
 
   validates :recorded_at, presence: true

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_21_080004) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_21_120000) do
   create_table "condition_logs", force: :cascade do |t|
     t.integer "appetite", null: false
     t.integer "clarity", null: false
@@ -58,6 +58,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_21_080004) do
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "uuid", null: false
+    t.index ["uuid"], name: "index_users_on_uuid", unique: true
   end
 
   create_table "weather_samples", force: :cascade do |t|

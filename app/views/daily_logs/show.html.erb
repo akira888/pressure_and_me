@@ -1,0 +1,51 @@
+<% content_for :title, "朝の記録 | 気圧とわたし" %>
+<section class="page-intro">
+  <p class="eyebrow"><%= @daily_log.date.strftime("%Y年%-m月%-d日") %> <span>1日1回の振り返り</span></p>
+  <h1>朝の記録</h1>
+  <p>今朝のすっきり感と、昨日の過ごし方を振り返りましょう。</p>
+</section>
+<%= form_with model: @daily_log, url: user_daily_log_path(uuid: current_user.uuid), method: :put do |form| %>
+  <%= render "shared/errors", record: @daily_log %>
+  <section class="card">
+    <div class="card-header"><h2>今朝のようす</h2><span class="small-note">起きたときの感覚</span></div>
+    <%= render "shared/score", form: form, field: :wakeup_freshness, label: "朝のすっきり感", low: "すっきりしない", high: "とてもすっきり" %>
+    <fieldset class="input-row">
+      <legend>昨晩の睡眠時間</legend>
+      <p class="field-hint">昨晩から今朝までの合計</p>
+      <div class="duration-inputs">
+        <%= form.label :sleep_hours, "睡眠時間（時間）", class: "visually-hidden" %>
+        <%= form.number_field :sleep_hours, min: 0, step: 1, required: true, inputmode: "numeric", placeholder: "6" %><span>時間</span>
+        <%= form.label :sleep_remainder_minutes, "睡眠時間（分）", class: "visually-hidden" %>
+        <%= form.number_field :sleep_remainder_minutes, min: 0, max: 59, step: 1, required: true, inputmode: "numeric", placeholder: "30" %><span>分</span>
+      </div>
+    </fieldset>
+  </section>
+  <section class="card">
+    <div class="card-header"><h2>昨日の過ごし方</h2><span class="small-note"><%= (@daily_log.date - 1).strftime("%-m月%-d日") %>のこと</span></div>
+    <div class="input-row">
+      <%= form.label :steps, "歩数" %>
+      <div class="number-with-unit"><%= form.number_field :steps, min: 0, step: 1, required: true, inputmode: "numeric", placeholder: "4000" %><span>歩</span></div>
+    </div>
+    <fieldset class="input-row">
+      <legend>お酒を飲みましたか？</legend>
+      <div class="radio-options">
+        <label><%= form.radio_button :drank_alcohol, "1", checked: @daily_log.drank_alcohol == true, required: true %><span>はい</span></label>
+        <label><%= form.radio_button :drank_alcohol, "0", checked: @daily_log.drank_alcohol == false, required: true %><span>いいえ</span></label>
+      </div>
+    </fieldset>
+    <fieldset class="input-row">
+      <legend>画面を見ていた時間</legend>
+      <p class="field-hint">スマートフォンやパソコンなどの合計</p>
+      <div class="duration-inputs">
+        <%= form.label :screen_hours, "画面時間（時間）", class: "visually-hidden" %>
+        <%= form.number_field :screen_hours, min: 0, step: 1, required: true, inputmode: "numeric", placeholder: "8" %><span>時間</span>
+        <%= form.label :screen_remainder_minutes, "画面時間（分）", class: "visually-hidden" %>
+        <%= form.number_field :screen_remainder_minutes, min: 0, max: 59, step: 1, required: true, inputmode: "numeric", placeholder: "0" %><span>分</span>
+      </div>
+    </fieldset>
+  </section>
+  <div class="form-actions">
+    <%= form.submit "朝の記録を保存する", class: "primary-button", data: { turbo_submits_with: "保存しています…" } %>
+    <p class="small-note"><%= @daily_log.persisted? ? "今日は記録済みです。保存すると内容を更新します。" : "同じ日の記録は、何度でも更新できます。" %></p>
+  </div>
+<% end %>

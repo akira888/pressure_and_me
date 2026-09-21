@@ -25,7 +25,16 @@ bin/dev
 準備だけなら `bin/setup --skip-server` を使います。
 
 [http://localhost:3000](http://localhost:3000) にアクセスします。
-Phase 1ではRailsの初期画面が表示されます。ヘルスチェックは `/up` です。
+`bin/rails db:seed` で初期ユーザー（id: 1）を作成すると、コンソールでUUIDを確認できます。
+
+```sh
+bin/rails runner 'puts User.find(1).uuid'
+```
+
+表示されたUUIDを使って `http://localhost:3000/u/<UUID>` を開くと、体調入力画面を起点に
+「体調」「朝の記録」「分析」の3タブを利用できます。ログイン画面は設けず、URLのUUIDで
+ユーザーを識別します。既定地点は設定UIを設けず、必要に応じてRailsコンソールから登録します。
+ヘルスチェックは `/up` です。
 `bin/dev` はPuma内でSolid Queueも起動するため、ジョブ用の別ターミナルは不要です。
 Ctrl-Cで停止できます。
 

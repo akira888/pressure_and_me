@@ -1,0 +1,12 @@
+<% content_for :title, "分析 | 気圧とわたし" %>
+<section class="page-intro">
+  <p class="eyebrow">記録を振り返る</p>
+  <h1>体調と気圧のつながり</h1>
+  <p>毎日の記録を、これからの気づきに。</p>
+</section>
+<section class="card empty-state">
+  <div class="empty-illustration" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+  <h2>分析画面は準備中です</h2>
+  <p>体調と気圧の変化を、同じ時間軸で振り返れるようになります。<br>まずは日々の記録を残していきましょう。</p>
+  <%= link_to "体調を記録する", user_home_path(uuid: current_user.uuid), class: "secondary-button" %>
+</section>

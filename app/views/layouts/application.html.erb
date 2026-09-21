@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
   <head>
-    <title><%= content_for(:title) || "Pressure And Me" %></title>
+    <title><%= content_for(:title) || "気圧とわたし" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Pressure And Me">
@@ -24,6 +24,26 @@
   </head>
 
   <body>
-    <%= yield %>
+    <div class="app-shell">
+      <header class="site-header">
+        <div class="wordmark">
+          <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5 19a11 11 0 0 1 22 0M9 19a7 7 0 0 1 14 0M16 19l5-8M4 25h24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>気圧とわたし</span>
+        </div>
+        <span class="brand-caption">からだの小さな変化を残す</span>
+      </header>
+      <% if respond_to?(:current_user) && current_user %>
+        <nav class="tabs" aria-label="記録メニュー">
+          <%= link_to "体調", user_home_path(uuid: current_user.uuid), aria: { current: ("page" if controller_name == "condition_logs") } %>
+          <%= link_to "朝の記録", user_daily_log_path(uuid: current_user.uuid), aria: { current: ("page" if controller_name == "daily_logs") } %>
+          <%= link_to "分析", user_analysis_path(uuid: current_user.uuid), aria: { current: ("page" if controller_name == "analyses") } %>
+        </nav>
+      <% end %>
+      <main id="main-content">
+        <% if notice %><div class="notice" role="status"><span aria-hidden="true">✓</span> <%= notice %></div><% end %>
+        <%= yield %>
+      </main>
+      <footer class="site-footer">気圧とわたし <span aria-hidden="true">·</span> 毎日の記録から、少しずつ。</footer>
+    </div>
   </body>
 </html>

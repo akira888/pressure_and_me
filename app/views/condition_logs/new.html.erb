@@ -1,0 +1,25 @@
+<% content_for :title, "体調の記録 | 気圧とわたし" %>
+<section class="page-intro">
+  <p class="eyebrow"><%= Date.current.strftime("%Y年%-m月%-d日") %> <span>今日の記録</span></p>
+  <h1>いまの体調</h1>
+  <p>気づいたときに、何度でも。いまの感覚を残しましょう。</p>
+</section>
+<%= form_with model: @condition_log, url: user_condition_logs_path(uuid: current_user.uuid), method: :post do |form| %>
+  <%= render "shared/errors", record: @condition_log %>
+  <section class="card">
+    <div class="card-header"><h2>からだのようす</h2><span class="small-note">1〜10で選択</span></div>
+    <%= render "shared/score", form: form, field: :headache, label: "頭痛", low: "なし", high: "とても強い" %>
+    <%= render "shared/score", form: form, field: :nausea, label: "気持ち悪さ", low: "なし", high: "とても強い" %>
+    <%= render "shared/score", form: form, field: :fatigue, label: "だるさ", low: "なし", high: "とても強い" %>
+    <%= render "shared/score", form: form, field: :appetite, label: "食欲", low: "ない", high: "とてもある" %>
+    <%= render "shared/score", form: form, field: :clarity, label: "頭のクリアさ", low: "ぼんやり", high: "とてもクリア" %>
+  </section>
+  <section class="card time-card">
+    <div><%= form.label :recorded_at, "記録時刻" %><p class="small-note">必要に応じて変更できます</p></div>
+    <%= form.datetime_local_field :recorded_at, value: @condition_log.recorded_at&.strftime("%Y-%m-%dT%H:%M"), required: true %>
+  </section>
+  <div class="form-actions">
+    <%= form.submit "体調を記録する", class: "primary-button", data: { turbo_submits_with: "保存しています…" } %>
+    <p class="small-note">保存するたびに、新しい記録を追加します。</p>
+  </div>
+<% end %>

@@ -1,0 +1,10 @@
+<div class="score-row" data-controller="score">
+  <div class="score-heading">
+    <%= form.label field, label %>
+    <div class="score-value"><output for="<%= form.field_id(field) %>" data-score-target="output"><%= form.object.public_send(field) %></output><span> / 10</span></div>
+  </div>
+  <%= form.range_field field, min: 1, max: 10, step: 1, required: true,
+    aria: { describedby: "#{form.field_id(field)}_scale" },
+    data: { score_target: "input", action: "input->score#update" } %>
+  <div class="scale-labels" id="<%= form.field_id(field) %>_scale"><span>1 · <%= low %></span><span>10 · <%= high %></span></div>
+</div>
