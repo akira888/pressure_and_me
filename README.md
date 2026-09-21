@@ -86,7 +86,7 @@ Weather::Importer.call(location: location, from: from, to: to, data_kind: :confi
 同じ地点・時刻・種別の再取得は更新になり、別の系列は変更しません。
 全項目が欠けた時間は保存せず、一部の欠損はNULLとして保存します。
 通信・レスポンスのエラーは例外で通知し、その取得分は保存しません。
-自動同期とリトライはPhase 4で追加します。
+自動同期はPhase 4で追加した`WeatherSyncJob`が担当します。
 
 取得モデルなどの仕様とエラー種別は[設計メモ](pressure_condition_app_design.md)を参照してください。
 API関連のテストは固定レスポンスを使うため、ネットワーク接続なしで実行できます。
@@ -94,3 +94,19 @@ API関連のテストは固定レスポンスを使うため、ネットワー�
 ```sh
 PARALLEL_WORKERS=1 bin/rails test test/lib/clients/open_meteo_client_test.rb test/models/weather/importer_test.rb
 ```
+
+## 非同期同期
+
+Phase 4で`WeatherBackfillJob`と`WeatherSyncJob`を追加しました。
+どちらも`weather`キューで実行され、Solid Queueのdevelopment/production設定では
+`WeatherSyncJob`が毎時実行されます。
+
+```ruby
+WeatherBackfillJob.perform_later
+WeatherSyncJob.perform_later
+```
+
+`WeatherBackfillJob`は全地点・2系列の過去7日間を取得します。
+`WeatherSyncJob`は系列ごとの最新時刻を起点に、直近24時間の欠損も再取得します。
+取得済みデータがない系列は7日間を対象にします。ジョブを再実行しても、
+地点・時刻・系列の一意キーで重複せず更新されます。

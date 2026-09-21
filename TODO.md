@@ -61,14 +61,19 @@
 
 ## Phase 4: 非同期ジョブと同期
 
-- [ ] `WeatherBackfillJob` を実装する
-- [ ] `WeatherSyncJob` を実装する
-- [ ] 初回7日分のバックフィルを実装する
-- [ ] 地点・データ種別ごとの差分取得と欠損再取得を実装する
-- [ ] Solid Queueの毎時recurring taskを設定する
-- [ ] ジョブ再実行・期間重複のテストを追加する
+- [x] `WeatherBackfillJob` を実装する
+- [x] `WeatherSyncJob` を実装する
+- [x] 初回7日分のバックフィルを実装する
+- [x] 地点・データ種別ごとの差分取得と欠損再取得を実装する
+- [x] Solid Queueの毎時recurring taskを設定する
+- [x] ジョブ再実行・期間重複のテストを追加する
 
 完了条件: 起動時バックフィルと毎時同期が、重複データを作らずに動作する。
+
+確認済み: ジョブテスト7件（29 assertions）。バックフィルは全地点・2系列を7日分、
+同期は各系列の最新時刻から取得しつつ直近24時間を再確認する。サンプルがない系列は7日分を取得する。
+Solid Queueのdevelopment/production recurring設定から`WeatherSyncJob`を毎時起動する。
+Importerのupsertにより再実行・期間重複は冪等になる。
 
 ## Phase 5: 記録画面
 

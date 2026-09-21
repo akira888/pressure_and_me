@@ -156,6 +156,8 @@ WeatherBackfillJob / WeatherSyncJob
 - `confirmed` はAPIが返す利用可能な時刻だけを保存する。
 - 以降は地点・`data_kind`ごとに最新の `observed_at` 以降を差分取得する。
 - `WeatherSyncJob` は毎時実行し、データ種別ごとに直近期間の欠損も検査・再取得する。
+- `WeatherSyncJob` は最新サンプルを下限にする。ただし直近24時間を再取得範囲に含め、
+  最新サンプルが新しい場合も欠損を再検査する。系列が空の場合は過去7日分を対象にする。
 - `Weather::Importer` は取得期間の決定をせず、指定範囲を取得・整形・upsertする。
 - `Clients::OpenMeteoClient` はHTTP通信、パラメータ構築、`data_kind`ごとのエンドポイント・モデル選択、レスポンス整形だけを担う。DBを知らない。
 
@@ -277,6 +279,14 @@ ConditionLog: 10:37
   同一キーの気象値を更新し、ID・作成日時と他の地点・系列は保持する。
   部分的な欠損を含む有効な再取得結果は、そのNULLも含めて更新する。
 - HTTP境界を差し替えた固定レスポンスで、外部APIに依存しない自動テストを行う。
+
+### Phase 4で採用した実装詳細
+
+- `WeatherBackfillJob` は全Locationについて`realtime`と`confirmed`を7日間取得する。
+- `WeatherSyncJob` は全Location・系列について、`min(最新サンプル, 現在時刻-24時間)`から現在時刻までを取得する。
+  サンプルがない系列は現在時刻から7日前を下限にする。
+- 両ジョブは`weather`キューに入り、Importerの冪等upsertにより再実行できる。
+- Solid Queueの`config/recurring.yml`でdevelopment/productionとも毎時`WeatherSyncJob`を起動する。
 
 2026-09-21に確認した[公式Historical Weather API仕様](https://open-meteo.com/en/docs/historical-weather-api)では、
 ECMWF IFSは毎時データ・6時間ごとの更新・遅延なしと記載されている。
