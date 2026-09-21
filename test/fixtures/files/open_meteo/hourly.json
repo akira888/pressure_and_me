@@ -1,0 +1,14 @@
+{
+  "latitude": 35.7,
+  "longitude": 139.75,
+  "timezone": "Asia/Tokyo",
+  "utc_offset_seconds": 32400,
+  "hourly": {
+    "time": ["2026-09-14T00:00", "2026-09-14T01:00", "2026-09-14T02:00"],
+    "temperature_2m": [25.1, 24.8, 24.5],
+    "relative_humidity_2m": [60, 62, 65],
+    "precipitation": [0.0, 0.1, 0.2],
+    "pressure_msl": [1013.25, 1012.75, 1012.0],
+    "weather_code": [1, 2, 3]
+  }
+}

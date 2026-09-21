@@ -5,6 +5,8 @@
 
 ## 開発の進め方
 
+- Serviceレイヤーを作らずMVCで構成する。取り込み処理はModel側、外部HTTP通信は `lib/clients` に置く。
+- TDDで、失敗するテストの確認→実装→テスト成功→整理の順に進める。
 - Phase完了などの作業の区切りで、必要な検証とTODO更新を行い、Gitにコミットする。
 - コミット後は、コミットIDと実装・検証結果を共有する。
 
@@ -45,13 +47,17 @@
 
 ## Phase 3: 気象データの取り込み
 
-- [ ] `Clients::OpenMeteoClient` を実装する
-- [ ] `Weather::Importer` を実装する
-- [ ] `realtime`（Forecast API / JMA）を取得・upsertする処理を実装する
-- [ ] `confirmed`（Historical Weather API / ECMWF IFS）を取得・upsertする処理を実装する
-- [ ] APIレスポンスの変換、失敗時の扱い、冪等性をテストする
+- [x] `Clients::OpenMeteoClient` を実装する
+- [x] `Weather::Importer` を実装する
+- [x] `realtime`（Forecast API / JMA）を取得・upsertする処理を実装する
+- [x] `confirmed`（Historical Weather API / ECMWF IFS）を取得・upsertする処理を実装する
+- [x] APIレスポンスの変換、失敗時の扱い、冪等性をテストする
 
 完了条件: 任意の既定地点に対し、2種類の毎時気象データを安全に保存できる。
+
+確認済み: クライアント14件・取り込み11件をテスト先行で追加。
+東京駅付近の公開座標で、両APIから2026-09-14の24時間分を実取得し、変換まで確認。
+実APIの確認ではDB保存を行わず、自動テストは固定レスポンスでネットワークから独立させる。
 
 ## Phase 4: 非同期ジョブと同期
 

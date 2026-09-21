@@ -67,3 +67,30 @@ bin/rubocop
 
 Rails標準のCI設定も含めています。`bin/ci` は上記に加えて依存関係などの
 セキュリティ検査を実行するため、ネットワーク接続が必要です。
+
+## 気象データの手動取り込み
+
+Phase 3では、Railsコンソールから指定期間を取得・保存できます。
+先に既定地点を登録した状態で、`bin/rails console` から実行します。
+
+```ruby
+location = Location.first!
+from = 7.days.ago.beginning_of_day
+to = Time.current
+
+Weather::Importer.call(location: location, from: from, to: to, data_kind: :realtime)
+Weather::Importer.call(location: location, from: from, to: to, data_kind: :confirmed)
+```
+
+返り値は期間内の利用可能なサンプル数です。範囲は両端を含みます。
+同じ地点・時刻・種別の再取得は更新になり、別の系列は変更しません。
+全項目が欠けた時間は保存せず、一部の欠損はNULLとして保存します。
+通信・レスポンスのエラーは例外で通知し、その取得分は保存しません。
+自動同期とリトライはPhase 4で追加します。
+
+取得モデルなどの仕様とエラー種別は[設計メモ](pressure_condition_app_design.md)を参照してください。
+API関連のテストは固定レスポンスを使うため、ネットワーク接続なしで実行できます。
+
+```sh
+PARALLEL_WORKERS=1 bin/rails test test/lib/clients/open_meteo_client_test.rb test/models/weather/importer_test.rb
+```

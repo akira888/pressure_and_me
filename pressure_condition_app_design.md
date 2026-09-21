@@ -137,7 +137,7 @@ temperature_2m, relative_humidity_2m, precipitation, pressure_msl, weather_code
 | `confirmed` | 月次など蓄積データの分析 | Historical Weather API、`models=ecmwf_ifs` |
 
 - `realtime` は予報モデル由来の値を含む即時データ。
-- `confirmed` は履歴APIが返す時刻だけを保存する。リアルタイムから約2日遅れて利用可能になる想定。
+- `confirmed` は履歴APIが返す利用可能な時刻だけを保存する。取得の遅延を固定日数で仮定しない。
 - `confirmed` の取得後も `realtime` を更新・削除しない。
 
 ### 取得処理
@@ -147,7 +147,7 @@ Active Job + Solid Queueを使い、同期的なAPI呼び出しでアプリ起�
 ```text
 WeatherBackfillJob / WeatherSyncJob
   └─ 地点・data_kindごとに取得期間を決定
-      └─ Weather::Importer.call(from:, to:, data_kind:)
+      └─ Weather::Importer.call(location:, from:, to:, data_kind:)
           └─ Clients::OpenMeteoClient
               └─ Open-Meteo API
 ```
@@ -243,7 +243,6 @@ ConditionLog: 10:37
 
 ## 8. 実装時に決める詳細
 
-- Open-Meteo HTTPクライアントの実装とメソッドシグネチャ
 - 起動時にBackfillJobをenqueueする方法
 - グラフライブラリ
 - 分析期間、症状閾値の初期値
@@ -258,3 +257,29 @@ ConditionLog: 10:37
 - 関連レコードがあるUser・Locationの削除は制限し、暗黙の連鎖削除を行わない。
 - 制約はRailsのmigration APIと標準SQLの比較・`IN`・`CAST`で定義する。
   PostgreSQLでの動作確認は移行時に行う。
+
+### Phase 3で採用した実装詳細
+
+- Serviceレイヤーは設けず、`Weather::Importer` は `app/models/weather`、
+  `Clients::OpenMeteoClient` は `lib/clients` に置く。
+- `Weather::Importer.call(location:, from:, to:, data_kind:)` は保存済みLocationと
+  両端を含む時刻範囲を受け取り、対象サンプル数を返す。期間の自動決定は行わない。
+- クライアントは `fetch(latitude:, longitude:, from:, to:, data_kind:)`。
+  `from` / `to` はTimeまたはActiveSupport::TimeWithZoneで指定する。
+  APIには東京日付の `start_date` / `end_date` を渡し、返却後に指定時刻範囲へ絞る。
+- HTTPは標準のNet::HTTPを使用。接続5秒・読み取り15秒・書き込み5秒のタイムアウトを設定する。
+  クライアント内の自動リトライは行わず、Phase 4でジョブ側の再実行を扱う。
+- 通信失敗は `TransportError`、HTTP失敗はステータスを持つ `HTTPError`、
+  不正なJSON・配列長・時刻・数値は `InvalidResponse` として通知する。
+- 部分的な欠損はNULLで保持する。全気象項目がNULLの時間は保存せず、
+  再取得が全項目NULLだった場合も既存の観測値は削除しない。
+- 全レスポンスの変換・検証を終えてから、単一の `upsert_all` で保存する。
+  同一キーの気象値を更新し、ID・作成日時と他の地点・系列は保持する。
+  部分的な欠損を含む有効な再取得結果は、そのNULLも含めて更新する。
+- HTTP境界を差し替えた固定レスポンスで、外部APIに依存しない自動テストを行う。
+
+2026-09-21に確認した[公式Historical Weather API仕様](https://open-meteo.com/en/docs/historical-weather-api)では、
+ECMWF IFSは毎時データ・6時間ごとの更新・遅延なしと記載されている。
+以前の「約2日遅れ」という想定は撤回し、利用可能性は実際のレスポンスで判断する。
+`confirmed` はこのアプリ内の履歴系列の名称であり、観測の確定値や不変性を保証する名称ではない。
+日付範囲・単位・タイムゾーンは[Forecast API仕様](https://open-meteo.com/en/docs)も参照する。
