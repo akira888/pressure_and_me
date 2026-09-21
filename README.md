@@ -40,7 +40,7 @@ bin/jobs
 ```
 
 `bin/dev` と `bin/jobs` の同時起動は不要です。
-気象取得ジョブと毎時同期は、後続のPhaseで実装します。
+地点登録時の初回取得、毎時同期、Solid Queue再開時の補完が非同期で実行されます。
 
 ## DBと日時
 
@@ -75,7 +75,7 @@ Phase 3では、Railsコンソールから指定期間を取得・保存でき�
 
 ```ruby
 location = Location.first!
-from = 7.days.ago.beginning_of_day
+from = Time.current.beginning_of_hour - 24.hours
 to = Time.current
 
 Weather::Importer.call(location: location, from: from, to: to, data_kind: :realtime)
@@ -98,15 +98,22 @@ PARALLEL_WORKERS=1 bin/rails test test/lib/clients/open_meteo_client_test.rb tes
 ## 非同期同期
 
 Phase 4で`WeatherBackfillJob`と`WeatherSyncJob`を追加しました。
-どちらも`weather`キューで実行され、Solid Queueのdevelopment/production設定では
-`WeatherSyncJob`が毎時実行されます。
+どちらも`weather`キューで実行されます。初回取得は地点登録の確定後に自動で予約され、
+その後はSolid Queueのdevelopment/production設定で`WeatherSyncJob`が毎時実行されます。
+`bin/dev`または`bin/jobs`によるSolid Queueの開始・再開時にも同期を予約します。
 
 ```ruby
-WeatherBackfillJob.perform_later
+WeatherBackfillJob.perform_later(location_id: location.id)
 WeatherSyncJob.perform_later
 ```
 
-`WeatherBackfillJob`は全地点・2系列の過去7日間を取得します。
-`WeatherSyncJob`は系列ごとの最新時刻を起点に、直近24時間の欠損も再取得します。
-取得済みデータがない系列は7日間を対象にします。ジョブを再実行しても、
-地点・時刻・系列の一意キーで重複せず更新されます。
+上のコマンドは手動で再取得したい場合に使います。初回取得は地点の登録時刻を基準に
+直近24時間の分析に必要な毎正時のデータを取得します。例えば10:37の登録では前日の10:00からです。
+実行が遅れても取得開始点を変えず、実行時刻までを補います。
+Locationを指定しない手動バックフィルは全地点が対象です。
+
+通常同期は系列ごとの最新時刻を起点に、直近24時間の欠損も再取得します。
+停止していた場合は24時間より長い空白も、APIが提供する範囲で補完します。
+取得済みデータがない系列は登録時の初回取得範囲から補います。
+サイトへのアクセス・リロード・地点の更新では、初回取得を予約しません。
+ジョブを再実行しても、地点・時刻・系列の一意キーで重複せず更新されます。

@@ -152,12 +152,16 @@ WeatherBackfillJob / WeatherSyncJob
               └─ Open-Meteo API
 ```
 
-- 初回バックフィルは過去7日分を対象に、`realtime` と `confirmed` の両方を取得する。
+- 地点登録が確定した時点で、その地点の初回バックフィルを非同期に予約する。
+  登録時刻の直前の毎正時から24時間前まで遡り、`realtime` と `confirmed` の両方を取得する。
+  例: 10:37に登録した場合は前日の10:00から取得し、初回からΔ24hを計算できるようにする。
 - `confirmed` はAPIが返す利用可能な時刻だけを保存する。
 - 以降は地点・`data_kind`ごとに最新の `observed_at` 以降を差分取得する。
 - `WeatherSyncJob` は毎時実行し、データ種別ごとに直近期間の欠損も検査・再取得する。
 - `WeatherSyncJob` は最新サンプルを下限にする。ただし直近24時間を再取得範囲に含め、
-  最新サンプルが新しい場合も欠損を再検査する。系列が空の場合は過去7日分を対象にする。
+  最新サンプルが新しい場合も欠損を再検査する。系列が空の場合は地点登録時の初回取得範囲から補う。
+- Solid Queueの開始・再開時にも同期ジョブを予約し、保存済みの続きから停止中の期間を補う。
+  サイトアクセスやリロードのたびにバックフィルは行わない。
 - `Weather::Importer` は取得期間の決定をせず、指定範囲を取得・整形・upsertする。
 - `Clients::OpenMeteoClient` はHTTP通信、パラメータ構築、`data_kind`ごとのエンドポイント・モデル選択、レスポンス整形だけを担う。DBを知らない。
 
@@ -245,7 +249,6 @@ ConditionLog: 10:37
 
 ## 8. 実装時に決める詳細
 
-- 起動時にBackfillJobをenqueueする方法
 - グラフライブラリ
 - 分析期間、症状閾値の初期値
 
@@ -282,11 +285,16 @@ ConditionLog: 10:37
 
 ### Phase 4で採用した実装詳細
 
-- `WeatherBackfillJob` は全Locationについて`realtime`と`confirmed`を7日間取得する。
-- `WeatherSyncJob` は全Location・系列について、`min(最新サンプル, 現在時刻-24時間)`から現在時刻までを取得する。
-  サンプルがない系列は現在時刻から7日前を下限にする。
+- `WeatherBackfillJob` は指定されたLocationについて、登録時の直前の毎正時の24時間前から
+  実行時刻まで両系列を取得する。実行が遅れた場合も登録時の分析に必要な期間を保持する。
+  Location未指定の手動実行は全地点を対象にする。
+- `Location.after_create_commit` でその地点のバックフィルを予約する。更新・ロールバックでは予約しない。
+- `WeatherSyncJob` は全Location・系列について、`min(最新サンプル, 現在の毎正時-24時間)`から
+  現在時刻までを取得する。未来のサンプルは最新時刻の判定から除外する。
+  系列が空の場合は地点登録時の直前の毎正時の24時間前を初回の下限にする。
 - 両ジョブは`weather`キューに入り、Importerの冪等upsertにより再実行できる。
 - Solid Queueの`config/recurring.yml`でdevelopment/productionとも毎時`WeatherSyncJob`を起動する。
+- `SolidQueue.on_start` でも`WeatherSyncJob`を予約する。通常のRails初期化ではDB参照やAPI通信を行わない。
 
 2026-09-21に確認した[公式Historical Weather API仕様](https://open-meteo.com/en/docs/historical-weather-api)では、
 ECMWF IFSは毎時データ・6時間ごとの更新・遅延なしと記載されている。
