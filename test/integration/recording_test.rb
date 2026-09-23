@@ -84,6 +84,11 @@ class RecordingTest < ActionDispatch::IntegrationTest
       screen_minutes: 100, steps: 100, drank_alcohol: true)
     get "#{@base}/daily_log"
     assert_select "input[name='daily_log[wakeup_freshness]'][value='5']"
+    assert_select "input[name='daily_log[sleep_hours]'][value='6']"
+    assert_select "input[name='daily_log[sleep_remainder_minutes]'][value='30']"
+    assert_select "input[name='daily_log[steps]'][value='4000']"
+    assert_select "input[name='daily_log[screen_hours]'][value='8']"
+    assert_select "input[name='daily_log[screen_remainder_minutes]'][value='0']"
     assert_select "input[name='daily_log[drank_alcohol]'][checked]", count: 0
   end
 

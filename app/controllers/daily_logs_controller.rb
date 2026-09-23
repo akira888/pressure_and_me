@@ -24,6 +24,12 @@ class DailyLogsController < UserScopedController
 
   def todays_log
     current_user.daily_logs.find_by(date: Date.current) ||
-      current_user.daily_logs.build(date: Date.current, wakeup_freshness: 5)
+      current_user.daily_logs.build(
+        date: Date.current,
+        wakeup_freshness: 5,
+        sleep_minutes: 390,
+        screen_minutes: 480,
+        steps: 4000
+      )
   end
 end

@@ -14,9 +14,9 @@
       <p class="field-hint">昨晩から今朝までの合計</p>
       <div class="duration-inputs">
         <%= form.label :sleep_hours, "睡眠時間（時間）", class: "visually-hidden" %>
-        <%= form.number_field :sleep_hours, min: 0, step: 1, required: true, inputmode: "numeric", placeholder: "6" %><span>時間</span>
+        <%= form.number_field :sleep_hours, min: 0, step: 1, required: true, inputmode: "numeric" %><span>時間</span>
         <%= form.label :sleep_remainder_minutes, "睡眠時間（分）", class: "visually-hidden" %>
-        <%= form.number_field :sleep_remainder_minutes, min: 0, max: 59, step: 1, required: true, inputmode: "numeric", placeholder: "30" %><span>分</span>
+        <%= form.number_field :sleep_remainder_minutes, min: 0, max: 59, step: 1, required: true, inputmode: "numeric" %><span>分</span>
       </div>
     </fieldset>
   </section>
@@ -24,7 +24,7 @@
     <div class="card-header"><h2>昨日の過ごし方</h2><span class="small-note"><%= (@daily_log.date - 1).strftime("%-m月%-d日") %>のこと</span></div>
     <div class="input-row">
       <%= form.label :steps, "歩数" %>
-      <div class="number-with-unit"><%= form.number_field :steps, min: 0, step: 1, required: true, inputmode: "numeric", placeholder: "4000" %><span>歩</span></div>
+      <div class="number-with-unit"><%= form.number_field :steps, min: 0, step: 1, required: true, inputmode: "numeric" %><span>歩</span></div>
     </div>
     <fieldset class="input-row">
       <legend>お酒を飲みましたか？</legend>
@@ -38,9 +38,9 @@
       <p class="field-hint">スマートフォンやパソコンなどの合計</p>
       <div class="duration-inputs">
         <%= form.label :screen_hours, "画面時間（時間）", class: "visually-hidden" %>
-        <%= form.number_field :screen_hours, min: 0, step: 1, required: true, inputmode: "numeric", placeholder: "8" %><span>時間</span>
+        <%= form.number_field :screen_hours, min: 0, step: 1, required: true, inputmode: "numeric" %><span>時間</span>
         <%= form.label :screen_remainder_minutes, "画面時間（分）", class: "visually-hidden" %>
-        <%= form.number_field :screen_remainder_minutes, min: 0, max: 59, step: 1, required: true, inputmode: "numeric", placeholder: "0" %><span>分</span>
+        <%= form.number_field :screen_remainder_minutes, min: 0, max: 59, step: 1, required: true, inputmode: "numeric" %><span>分</span>
       </div>
     </fieldset>
   </section>
