@@ -79,6 +79,13 @@ input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; marg
 .empty-state { padding: 50px 24px; text-align: center; }
 .empty-state h2 { font-size: 18px; margin: 22px 0 10px; }
 .empty-state p { color: var(--muted); font-size: 13px; line-height: 1.9; }
+.analysis-item { padding: 14px 0; border-top: 1px solid var(--line); }
+.analysis-item:first-child { border-top: 0; padding-top: 0; }
+.analysis-item-header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.metric-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 12px 0 0; }
+.metric-grid div { background: #f5f8f1; border-radius: 7px; padding: 7px 4px; text-align: center; }
+.metric-grid dt { color: var(--muted); font-size: 10px; }
+.metric-grid dd { color: var(--accent); font-size: 12px; font-variant-numeric: tabular-nums; margin: 2px 0 0; }
 .empty-illustration { display: flex; justify-content: center; align-items: center; gap: 9px; height: 70px; }
 .empty-illustration span { width: 13px; border-radius: 7px; background: #d6e2cc; height: 36px; }
 .empty-illustration span:nth-child(2) { height: 56px; background: #abc19f; }

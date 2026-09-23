@@ -24,6 +24,23 @@ class RecordingTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "analysis shows recent condition metrics when hourly weather exists" do
+    location = @user.create_location!(latitude: 35, longitude: 139)
+    recorded_at = Time.zone.local(2026, 9, 21, 10, 37)
+    @user.condition_logs.create!(headache: 4, nausea: 3, fatigue: 8, appetite: 5, clarity: 6,
+      recorded_at: recorded_at)
+    location.weather_samples.create!(observed_at: recorded_at.beginning_of_hour,
+      data_kind: :realtime, pressure_msl: 1012)
+    location.weather_samples.create!(observed_at: recorded_at.beginning_of_hour - 3.hours,
+      data_kind: :realtime, pressure_msl: 1009)
+
+    get "#{@base}/analysis"
+    assert_response :success
+    assert_select ".analysis-item", count: 1
+    assert_select ".analysis-item", text: /1012\.0 hPa/
+    assert_select ".analysis-item", text: /だるさ 8/
+  end
+
   test "unknown UUID cannot read or write records" do
     base = "/u/#{SecureRandom.uuid}"
     [ base, "#{base}/daily_log", "#{base}/analysis" ].each do |path|

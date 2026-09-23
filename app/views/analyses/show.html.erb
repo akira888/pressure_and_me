@@ -4,9 +4,31 @@
   <h1>体調と気圧のつながり</h1>
   <p>毎日の記録を、これからの気づきに。</p>
 </section>
-<section class="card empty-state">
-  <div class="empty-illustration" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-  <h2>分析画面は準備中です</h2>
-  <p>体調と気圧の変化を、同じ時間軸で振り返れるようになります。<br>まずは日々の記録を残していきましょう。</p>
-  <%= link_to "体調を記録する", user_home_path(uuid: current_user.uuid), class: "secondary-button" %>
+<section class="card">
+  <div class="card-header"><h2>最近の記録</h2><span class="small-note">直近20件・毎正時の気圧</span></div>
+  <% if @condition_logs.empty? %>
+    <div class="empty-state"><p>体調を記録すると、気圧との変化をここで確認できます。</p></div>
+  <% else %>
+    <div class="analysis-list">
+      <% @condition_logs.each do |log| %>
+        <% metrics = @weather_metrics.fetch(log.id) %>
+        <article class="analysis-item">
+          <div class="analysis-item-header">
+            <strong><%= log.recorded_at.in_time_zone.strftime("%-m月%-d日 %H:%M") %></strong>
+            <span class="small-note">だるさ <%= log.fatigue %> / 10</span>
+          </div>
+          <% if metrics[:pressure] %>
+            <dl class="metric-grid">
+              <div><dt>気圧</dt><dd><%= number_with_precision(metrics[:pressure], precision: 1) %> hPa</dd></div>
+              <% [3, 6, 12, 24].each do |hours| %>
+                <div><dt>Δ<%= hours %>h</dt><dd><%= metrics[:changes][hours] ? number_with_precision(metrics[:changes][hours], precision: 1) : "—" %></dd></div>
+              <% end %>
+            </dl>
+          <% else %>
+            <p class="small-note">この時刻の気圧データはまだありません。</p>
+          <% end %>
+        </article>
+      <% end %>
+    </div>
+  <% end %>
 </section>
