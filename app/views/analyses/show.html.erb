@@ -8,6 +8,15 @@
   <div class="card-header"><h2>月次分析の対象</h2><span class="small-note">confirmed・24時間分が揃った記録</span></div>
   <p class="monthly-count"><strong><%= @monthly_condition_logs.size %></strong>件</p>
   <p class="small-note">必要な気象データが揃った体調ログだけを月次集計に使用します。</p>
+  <% if @monthly_condition_logs.any? %>
+    <div class="monthly-summary">
+      <% { headache: "頭痛", nausea: "気持ち悪さ", fatigue: "だるさ", appetite: "食欲", clarity: "クリアさ" }.each do |score, label| %>
+        <% summary = @monthly_summary.fetch(score) %>
+        <% ratio = summary[:high_count].fdiv(summary[:count]) * 100 %>
+        <div><span><%= label %> 7以上</span><strong><%= number_with_precision(ratio, precision: 1) %>%</strong><small>n=<%= summary[:count] %></small></div>
+      <% end %>
+    </div>
+  <% end %>
 </section>
 <section class="card">
   <div class="card-header"><h2>最近の記録</h2><span class="small-note">直近20件・毎正時の気圧</span></div>

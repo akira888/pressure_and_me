@@ -94,6 +94,10 @@ input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; marg
 .trend-grid small { font-size: 10px; font-weight: 400; }
 .monthly-count { color: var(--accent); font-size: 30px; font-variant-numeric: tabular-nums; margin: 8px 0; }
 .monthly-count strong { font-weight: 700; }
+.monthly-summary { display: grid; gap: 8px; margin-top: 16px; }
+.monthly-summary div { display: grid; grid-template-columns: 1fr auto auto; align-items: baseline; gap: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.monthly-summary span, .monthly-summary small { color: var(--muted); font-size: 11px; }
+.monthly-summary strong { color: var(--accent); font-size: 16px; font-variant-numeric: tabular-nums; }
 .empty-illustration { display: flex; justify-content: center; align-items: center; gap: 9px; height: 70px; }
 .empty-illustration span { width: 13px; border-radius: 7px; background: #d6e2cc; height: 36px; }
 .empty-illustration span:nth-child(2) { height: 56px; background: #abc19f; }

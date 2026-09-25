@@ -43,6 +43,24 @@ class RecordingTest < ActionDispatch::IntegrationTest
     assert_select ".trend-grid", text: /だるさ/
   end
 
+  test "analysis shows monthly high score ratios with the eligible sample count" do
+    location = @user.create_location!(latitude: 35, longitude: 139)
+    2.times do |index|
+      recorded_at = Time.zone.local(2026, 9, 20 + (index * 2), 10, 37)
+      @user.condition_logs.create!(headache: index.zero? ? 8 : 4, nausea: 5, fatigue: 7,
+        appetite: 5, clarity: 5, recorded_at: recorded_at)
+      0.upto(24) do |hours_ago|
+        location.weather_samples.create!(observed_at: recorded_at.beginning_of_hour - hours_ago.hours,
+          data_kind: :confirmed, pressure_msl: 1010)
+      end
+    end
+
+    get "#{@base}/analysis"
+    assert_response :success
+    assert_select ".monthly-summary", text: /頭痛.*50\.0%.*n=2/
+    assert_select ".monthly-summary", text: /だるさ.*100\.0%.*n=2/
+  end
+
   test "unknown UUID cannot read or write records" do
     base = "/u/#{SecureRandom.uuid}"
     [ base, "#{base}/daily_log", "#{base}/analysis" ].each do |path|
