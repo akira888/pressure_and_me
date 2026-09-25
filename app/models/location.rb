@@ -8,7 +8,10 @@ class Location < ApplicationRecord
   validates :latitude, :longitude, numericality: true
 
   def weather_history_start
-    created_at.beginning_of_hour - 24.hours
+    registration_start = created_at.beginning_of_hour - 24.hours
+    oldest_log = user.condition_logs.minimum(:recorded_at)
+    log_start = oldest_log&.beginning_of_hour&.-(24.hours)
+    [ registration_start, log_start ].compact.min
   end
 
   private

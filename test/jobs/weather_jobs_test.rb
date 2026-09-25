@@ -112,6 +112,19 @@ class WeatherJobsTest < ActiveSupport::TestCase
     end
   end
 
+  test "backfill reaches before the oldest condition log for historical analysis" do
+    location = domain_location
+    oldest = @now - 5.days - 37.minutes
+    location.user.condition_logs.create!(headache: 5, nausea: 5, fatigue: 5, appetite: 5, clarity: 5,
+      recorded_at: oldest)
+
+    with_importer_stub { WeatherBackfillJob.perform_now(location_id: location.id, now: @now) }
+
+    expected_start = oldest.beginning_of_hour - 24.hours
+    assert_equal expected_start, @calls.first.fetch(:from)
+    assert_equal expected_start, location.weather_history_start
+  end
+
   test "delayed first jobs retain the period before registration" do
     location = domain_location
     travel_to @now + 3.days do
