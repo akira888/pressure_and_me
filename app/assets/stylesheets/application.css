@@ -92,6 +92,8 @@ input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; marg
 .trend-grid dt { color: var(--muted); font-size: 10px; }
 .trend-grid dd { color: var(--accent); font-size: 18px; font-variant-numeric: tabular-nums; font-weight: 600; margin: 3px 0 0; }
 .trend-grid small { font-size: 10px; font-weight: 400; }
+.monthly-count { color: var(--accent); font-size: 30px; font-variant-numeric: tabular-nums; margin: 8px 0; }
+.monthly-count strong { font-weight: 700; }
 .empty-illustration { display: flex; justify-content: center; align-items: center; gap: 9px; height: 70px; }
 .empty-illustration span { width: 13px; border-radius: 7px; background: #d6e2cc; height: 36px; }
 .empty-illustration span:nth-child(2) { height: 56px; background: #abc19f; }

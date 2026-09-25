@@ -39,6 +39,20 @@ class ConditionLogAnalysisTest < ActiveSupport::TestCase
     assert_equal 1020.0, @log.weather_metrics(data_kind: :confirmed)[:pressure]
   end
 
+  test "confirmed monthly analysis requires every hour in the 24 hour window" do
+    0.upto(24) do |hours_ago|
+      add_sample(hours_ago, 1010 + hours_ago, :confirmed)
+    end
+
+    assert @log.weather_data_complete?(data_kind: :confirmed)
+
+    @location.weather_samples.find_by!(
+      observed_at: @recorded_at.beginning_of_hour - 12.hours, data_kind: :confirmed
+    ).update!(pressure_msl: nil)
+
+    assert_not @log.weather_data_complete?(data_kind: :confirmed)
+  end
+
   private
 
   def add_sample(hours_ago, pressure, data_kind = :realtime)

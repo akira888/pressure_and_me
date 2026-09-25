@@ -24,6 +24,16 @@ class ConditionLog < ApplicationRecord
     { pressure: current.pressure_msl.to_f, changes: changes, ranges: pressure_ranges(samples, hour) }
   end
 
+  def weather_data_complete?(data_kind: :confirmed, location: user.location)
+    return false unless location
+
+    hour = recorded_at.beginning_of_hour
+    location.weather_samples.public_send(data_kind)
+      .where(observed_at: hour - 24.hours..hour)
+      .where.not(pressure_msl: nil)
+      .count == 25
+  end
+
   private
 
   def pressure_ranges(samples, hour)
