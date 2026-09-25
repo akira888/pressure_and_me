@@ -86,6 +86,12 @@ input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; marg
 .metric-grid div { background: #f5f8f1; border-radius: 7px; padding: 7px 4px; text-align: center; }
 .metric-grid dt { color: var(--muted); font-size: 10px; }
 .metric-grid dd { color: var(--accent); font-size: 12px; font-variant-numeric: tabular-nums; margin: 2px 0 0; }
+.metric-range { margin-top: 8px; }
+.trend-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 0; }
+.trend-grid div { text-align: center; }
+.trend-grid dt { color: var(--muted); font-size: 10px; }
+.trend-grid dd { color: var(--accent); font-size: 18px; font-variant-numeric: tabular-nums; font-weight: 600; margin: 3px 0 0; }
+.trend-grid small { font-size: 10px; font-weight: 400; }
 .empty-illustration { display: flex; justify-content: center; align-items: center; gap: 9px; height: 70px; }
 .empty-illustration span { width: 13px; border-radius: 7px; background: #d6e2cc; height: 36px; }
 .empty-illustration span:nth-child(2) { height: 56px; background: #abc19f; }

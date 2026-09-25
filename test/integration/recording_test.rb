@@ -39,6 +39,8 @@ class RecordingTest < ActionDispatch::IntegrationTest
     assert_select ".analysis-item", count: 1
     assert_select ".analysis-item", text: /1012\.0 hPa/
     assert_select ".analysis-item", text: /だるさ 8/
+    assert_select ".analysis-item", text: /気圧レンジ（6h \/ 24h）/
+    assert_select ".trend-grid", text: /だるさ/
   end
 
   test "unknown UUID cannot read or write records" do

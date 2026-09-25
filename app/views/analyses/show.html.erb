@@ -24,6 +24,7 @@
                 <div><dt>Δ<%= hours %>h</dt><dd><%= metrics[:changes][hours] ? number_with_precision(metrics[:changes][hours], precision: 1) : "—" %></dd></div>
               <% end %>
             </dl>
+            <p class="small-note metric-range">気圧レンジ（6h / 24h）：<%= metrics[:ranges][6] ? number_with_precision(metrics[:ranges][6], precision: 1) : "—" %> / <%= metrics[:ranges][24] ? number_with_precision(metrics[:ranges][24], precision: 1) : "—" %> hPa</p>
           <% else %>
             <p class="small-note">この時刻の気圧データはまだありません。</p>
           <% end %>
@@ -31,4 +32,14 @@
       <% end %>
     </div>
   <% end %>
+</section>
+<section class="card">
+  <div class="card-header"><h2>最近の傾向</h2><span class="small-note">全体 <%= @condition_logs.size %>件</span></div>
+  <dl class="trend-grid">
+    <% { headache: "頭痛", nausea: "気持ち悪さ", fatigue: "だるさ", appetite: "食欲", clarity: "クリアさ" }.each do |score, label| %>
+      <% summary = @score_summary.fetch(score) %>
+      <div><dt><%= label %></dt><dd><%= summary[:average] ? number_with_precision(summary[:average], precision: 1) : "—" %><small> / 10</small></dd></div>
+    <% end %>
+  </dl>
+  <p class="small-note">平均値は保存済みの体調ログ全件から計算しています。</p>
 </section>
