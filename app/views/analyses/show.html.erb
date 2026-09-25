@@ -4,6 +4,19 @@
   <h1>体調と気圧のつながり</h1>
   <p>毎日の記録を、これからの気づきに。</p>
 </section>
+<% if @chart %>
+  <section class="card">
+    <div class="card-header"><h2>気圧とだるさ</h2><span class="small-note">直近の記録</span></div>
+    <div class="chart-legend"><span class="pressure-key">気圧</span><span class="fatigue-key">だるさ</span></div>
+    <svg class="analysis-chart" viewBox="0 0 320 140" role="img" aria-label="気圧とだるさの推移">
+      <line x1="0" y1="130" x2="320" y2="130" class="chart-axis" />
+      <polyline points="<%= @chart[:pressure_points] %>" class="chart-line pressure-line" />
+      <polyline points="<%= @chart[:fatigue_points] %>" class="chart-line fatigue-line" />
+    </svg>
+    <div class="chart-labels"><span>古い記録</span><span>新しい記録</span></div>
+    <p class="small-note">気圧は相対的な変化、だるさは1〜10のスコアです。</p>
+  </section>
+<% end %>
 <section class="card">
   <div class="card-header"><h2>月次分析の対象</h2><span class="small-note">confirmed・24時間分が揃った記録</span></div>
   <p class="monthly-count"><strong><%= @monthly_condition_logs.size %></strong>件</p>

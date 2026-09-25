@@ -41,6 +41,7 @@ class RecordingTest < ActionDispatch::IntegrationTest
     assert_select ".analysis-item", text: /だるさ 8/
     assert_select ".analysis-item", text: /気圧レンジ（6h \/ 24h）/
     assert_select ".trend-grid", text: /だるさ/
+    assert_select "svg.analysis-chart[aria-label='気圧とだるさの推移']"
   end
 
   test "analysis shows monthly high score ratios with the eligible sample count" do

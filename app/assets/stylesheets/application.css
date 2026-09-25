@@ -98,6 +98,16 @@ input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; marg
 .monthly-summary div { display: grid; grid-template-columns: 1fr auto auto; align-items: baseline; gap: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
 .monthly-summary span, .monthly-summary small { color: var(--muted); font-size: 11px; }
 .monthly-summary strong { color: var(--accent); font-size: 16px; font-variant-numeric: tabular-nums; }
+.analysis-chart { display: block; width: 100%; height: auto; margin-top: 8px; }
+.chart-axis { stroke: var(--line); stroke-width: 1; }
+.chart-line { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.pressure-line { stroke: var(--accent); }
+.fatigue-line { stroke: #c2765d; stroke-dasharray: 5 4; }
+.chart-legend, .chart-labels { display: flex; justify-content: space-between; font-size: 11px; }
+.chart-legend { justify-content: flex-start; gap: 14px; margin-top: 8px; }
+.pressure-key { color: var(--accent); }
+.fatigue-key { color: #a75c46; }
+.chart-labels { color: var(--muted); margin-top: 3px; }
 .empty-illustration { display: flex; justify-content: center; align-items: center; gap: 9px; height: 70px; }
 .empty-illustration span { width: 13px; border-radius: 7px; background: #d6e2cc; height: 36px; }
 .empty-illustration span:nth-child(2) { height: 56px; background: #abc19f; }
