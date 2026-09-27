@@ -3,7 +3,7 @@
 このリポジトリで作業する前に、次の資料を確認すること。
 
 - `.codex/DEVELOPMENT.md`: 開発方針、アーキテクチャ、検証手順
-- `.codex/SESSION_HANDOFF.md`: 直近セッションの状態と未完了事項（存在する場合）
+- `.codex/local/SESSION_HANDOFF.md`: 直近セッションの状態と未完了事項（存在する場合）
 - `.codex/pressure_condition_app_design.md`: 仕様の正本
 - `.codex/TODO.md`: 実装順と完了状況
 
