@@ -32,7 +32,7 @@
   </section>
 <% end %>
 <section class="card pressure-fatigue-scatter">
-  <div class="card-header"><h2>6時間の気圧変化とだるさ</h2><span class="small-note">直近20件・n=<%= @scatter ? @scatter[:count] : 0 %></span></div>
+  <div class="card-header"><h2>6時間の気圧変化とだるさ</h2><span class="small-note">直近20件・realtime・n=<%= @scatter ? @scatter[:count] : 0 %></span></div>
   <% if @scatter %>
     <p class="small-note">1点は体調記録1件。左ほど6時間で気圧が下がり、上ほどだるさが強い状態です。</p>
     <svg class="analysis-chart scatter-chart" viewBox="0 0 340 180" role="img" aria-label="直近6時間の気圧変化とだるさの散布図">
@@ -51,9 +51,21 @@
       <% end %>
     </svg>
     <div class="chart-labels"><span>気圧低下</span><span>0（変化なし）</span><span>気圧上昇</span></div>
-    <p class="small-note">横軸：直近6時間の気圧変化（hPa）／縦軸：だるさ（1〜10）。点を重ねて見る図で、関係の強さはまだ判定していません。</p>
+    <p class="small-note">横軸：直近6時間の気圧変化（hPa）／縦軸：だるさ（1〜10）。</p>
+    <div class="correlation-summary">
+      <% if @correlation %>
+        <p>相関係数 <strong>r = <%= number_with_precision(@correlation, precision: 2) %></strong> <span class="small-note">n=<%= @scatter[:count] %></span></p>
+        <p class="small-note">負の値は、気圧が下がるほどだるさが強い方向を示します。直近20件のうち、気圧データが揃った記録から計算しています。</p>
+      <% elsif @scatter[:count] < 3 %>
+        <p class="small-note">相関係数：算出できません（n=<%= @scatter[:count] %>）。3件以上の記録が必要です。</p>
+      <% else %>
+        <p class="small-note">相関係数：算出できません（n=<%= @scatter[:count] %>）。気圧変化量かだるさの値にばらつきがないためです。</p>
+      <% end %>
+    </div>
+    <p class="small-note">相関は直線的な関係の目安です。記録が少ないと値が変わりやすく、原因を示すものではありません。</p>
   <% else %>
     <p class="small-note">6時間前と記録時点の気圧データが揃うと表示されます。</p>
+    <div class="correlation-summary"><p class="small-note">相関係数：算出できません（n=0）。3件以上の記録が必要です。</p></div>
   <% end %>
 </section>
 <section class="card">

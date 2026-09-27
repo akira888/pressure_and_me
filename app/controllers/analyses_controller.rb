@@ -19,10 +19,12 @@ class AnalysesController < UserScopedController
       metrics = @weather_metrics.fetch(log.id)
       [ log, metrics ] if metrics[:pressure]
     end)
-    @scatter = build_scatter(@condition_logs.filter_map do |log|
+    comparison_logs = @condition_logs.filter_map do |log|
       change = @weather_metrics.fetch(log.id)[:changes][6]
       [ log, change ] if change
-    end)
+    end
+    @scatter = build_scatter(comparison_logs)
+    @correlation = pressure_fatigue_correlation(comparison_logs)
   end
 
   private
@@ -56,5 +58,18 @@ class AnalysesController < UserScopedController
         change: change, fatigue: log.fatigue }
     end
     { points: points, extent: extent, count: points.size }
+  end
+
+  def pressure_fatigue_correlation(logs)
+    return nil if logs.size < 3
+
+    mean_change = logs.sum { |_, change| change }.fdiv(logs.size)
+    mean_fatigue = logs.sum { |log, _| log.fatigue }.fdiv(logs.size)
+    deviations = logs.map { |log, change| [ change - mean_change, log.fatigue - mean_fatigue ] }
+    change_variance = deviations.sum { |change, _| change**2 }
+    fatigue_variance = deviations.sum { |_, fatigue| fatigue**2 }
+    return nil if change_variance.zero? || fatigue_variance.zero?
+
+    deviations.sum { |change, fatigue| change * fatigue } / Math.sqrt(change_variance * fatigue_variance)
   end
 end

@@ -94,6 +94,49 @@ class RecordingTest < ActionDispatch::IntegrationTest
     assert_select "svg[aria-label='直近6時間の気圧変化とだるさの散布図']", count: 0
   end
 
+  test "analysis correlates only the pressure and fatigue pairs shown in the scatter" do
+    location = @user.create_location!(latitude: 35, longitude: 139)
+    [ [ -4, 8 ], [ 0, 5 ], [ 4, 2 ], [ nil, 10 ] ].each_with_index do |(change, fatigue), index|
+      hour = Time.zone.local(2026, 9, 17 + index, 10)
+      @user.condition_logs.create!(@scores.merge(recorded_at: hour + 37.minutes, fatigue: fatigue))
+      location.weather_samples.create!(observed_at: hour, data_kind: :realtime, pressure_msl: 1010)
+      if change
+        location.weather_samples.create!(observed_at: hour - 6.hours, data_kind: :realtime,
+          pressure_msl: 1010 - change)
+      end
+    end
+
+    get "#{@base}/analysis"
+
+    assert_response :success
+    assert_select ".pressure-fatigue-scatter circle.scatter-point", count: 3
+    assert_select ".correlation-summary", text: /r = -1\.00.*n=3/m
+    assert_select ".correlation-summary", text: /気圧が下がるほどだるさが強い方向/
+  end
+
+  test "analysis leaves correlation undefined for too few pairs or no variation" do
+    location = @user.create_location!(latitude: 35, longitude: 139)
+    2.times do |index|
+      hour = Time.zone.local(2026, 9, 18 + index, 10)
+      @user.condition_logs.create!(@scores.merge(recorded_at: hour + 37.minutes, fatigue: 4 + index))
+      location.weather_samples.create!(observed_at: hour, data_kind: :realtime, pressure_msl: 1010 + index)
+      location.weather_samples.create!(observed_at: hour - 6.hours, data_kind: :realtime, pressure_msl: 1010)
+    end
+
+    get "#{@base}/analysis"
+    assert_select ".correlation-summary", text: /n=2.*3件以上/m
+
+    location.weather_samples.find_by!(observed_at: Time.zone.local(2026, 9, 19, 10),
+      data_kind: :realtime).update!(pressure_msl: 1010)
+    hour = Time.zone.local(2026, 9, 20, 10)
+    @user.condition_logs.create!(@scores.merge(recorded_at: hour + 37.minutes, fatigue: 6))
+    location.weather_samples.create!(observed_at: hour, data_kind: :realtime, pressure_msl: 1010)
+    location.weather_samples.create!(observed_at: hour - 6.hours, data_kind: :realtime, pressure_msl: 1010)
+
+    get "#{@base}/analysis"
+    assert_select ".correlation-summary", text: /n=3.*値にばらつきがない/m
+  end
+
   test "unknown UUID cannot read or write records" do
     base = "/u/#{SecureRandom.uuid}"
     [ base, "#{base}/daily_log", "#{base}/analysis" ].each do |path|
