@@ -19,6 +19,10 @@ class AnalysesController < UserScopedController
       metrics = @weather_metrics.fetch(log.id)
       [ log, metrics ] if metrics[:pressure]
     end)
+    @scatter = build_scatter(@condition_logs.filter_map do |log|
+      change = @weather_metrics.fetch(log.id)[:changes][6]
+      [ log, change ] if change
+    end)
   end
 
   private
@@ -39,5 +43,18 @@ class AnalysesController < UserScopedController
     end
     { pressure_points: points_for.call(->(_, metrics) { (metrics[:pressure] - min_pressure) / pressure_span }),
       fatigue_points: points_for.call(->(log, _) { (log.fatigue - 1).fdiv(9) }) }
+  end
+
+  def build_scatter(logs)
+    return nil if logs.empty?
+
+    extent = [ logs.map { |_, change| change.abs }.max, 1 ].max
+    points = logs.map do |log, change|
+      { x: (170 + change.fdiv(extent) * 130).round(1),
+        y: (16 + (10 - log.fatigue).fdiv(9) * 116).round(1),
+        date: log.recorded_at.in_time_zone.strftime("%Y/%m/%d %H:%M"),
+        change: change, fatigue: log.fatigue }
+    end
+    { points: points, extent: extent, count: points.size }
   end
 end

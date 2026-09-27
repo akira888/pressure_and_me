@@ -31,6 +31,31 @@
     <p class="small-note">気圧は相対的な変化、だるさは1〜10のスコアです。</p>
   </section>
 <% end %>
+<section class="card pressure-fatigue-scatter">
+  <div class="card-header"><h2>6時間の気圧変化とだるさ</h2><span class="small-note">直近20件・n=<%= @scatter ? @scatter[:count] : 0 %></span></div>
+  <% if @scatter %>
+    <p class="small-note">1点は体調記録1件。左ほど6時間で気圧が下がり、上ほどだるさが強い状態です。</p>
+    <svg class="analysis-chart scatter-chart" viewBox="0 0 340 180" role="img" aria-label="直近6時間の気圧変化とだるさの散布図">
+      <line x1="40" y1="132" x2="300" y2="132" class="chart-axis" />
+      <line x1="40" y1="16" x2="40" y2="132" class="chart-axis" />
+      <line x1="170" y1="16" x2="170" y2="132" class="scatter-zero" />
+      <text x="20" y="20" class="scatter-tick">10</text>
+      <text x="25" y="134" class="scatter-tick">1</text>
+      <text x="40" y="151" text-anchor="middle" class="scatter-tick"><%= number_with_precision(-@scatter[:extent], precision: 1) %></text>
+      <text x="170" y="151" text-anchor="middle" class="scatter-tick">0</text>
+      <text x="300" y="151" text-anchor="middle" class="scatter-tick">+<%= number_with_precision(@scatter[:extent], precision: 1) %></text>
+      <% @scatter[:points].each do |point| %>
+        <circle class="scatter-point" cx="<%= point[:x] %>" cy="<%= point[:y] %>" r="5">
+          <title><%= point[:date] %>・Δ6h <%= "+" if point[:change].positive? %><%= number_with_precision(point[:change], precision: 1) %> hPa・だるさ <%= point[:fatigue] %> / 10</title>
+        </circle>
+      <% end %>
+    </svg>
+    <div class="chart-labels"><span>気圧低下</span><span>0（変化なし）</span><span>気圧上昇</span></div>
+    <p class="small-note">横軸：直近6時間の気圧変化（hPa）／縦軸：だるさ（1〜10）。点を重ねて見る図で、関係の強さはまだ判定していません。</p>
+  <% else %>
+    <p class="small-note">6時間前と記録時点の気圧データが揃うと表示されます。</p>
+  <% end %>
+</section>
 <section class="card">
   <div class="card-header"><h2>月次分析の対象</h2><span class="small-note">confirmed・24時間分が揃った記録</span></div>
   <p class="monthly-count"><strong><%= @monthly_condition_logs.size %></strong>件</p>

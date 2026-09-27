@@ -64,6 +64,36 @@ class RecordingTest < ActionDispatch::IntegrationTest
     assert_select ".monthly-summary", text: /だるさ.*100\.0%.*n=2/
   end
 
+  test "analysis plots six hour pressure change against fatigue and retains the existing trend" do
+    location = @user.create_location!(latitude: 35, longitude: 139)
+    [ [ 3.days.ago, 8, 1010, 1014 ], [ 2.days.ago, 2, 1010, 1006 ], [ 1.day.ago, 5, 1010, nil ] ].each do |time, fatigue, current, previous|
+      @user.condition_logs.create!(@scores.merge(recorded_at: time, fatigue: fatigue))
+      hour = time.beginning_of_hour
+      location.weather_samples.create!(observed_at: hour, data_kind: :realtime, pressure_msl: current)
+      location.weather_samples.create!(observed_at: hour - 6.hours, data_kind: :realtime, pressure_msl: previous) if previous
+    end
+
+    get "#{@base}/analysis"
+
+    assert_response :success
+    assert_select "svg.analysis-chart[aria-label='気圧とだるさの推移']"
+    assert_select ".pressure-fatigue-scatter", text: /n=2/
+    assert_select "svg[aria-label='直近6時間の気圧変化とだるさの散布図'] circle.scatter-point", count: 2
+    assert_select "circle.scatter-point[cx='40.0'][cy='41.8'] title", text: /-4\.0 hPa.*だるさ 8/
+    assert_select "circle.scatter-point[cx='300.0'][cy='119.1'] title", text: /\+4\.0 hPa.*だるさ 2/
+    assert_select ".pressure-fatigue-scatter", text: /気圧低下.*0.*気圧上昇/m
+  end
+
+  test "analysis explains when six hour pressure changes are unavailable" do
+    @user.condition_logs.create!(@scores.merge(recorded_at: Time.current))
+
+    get "#{@base}/analysis"
+
+    assert_response :success
+    assert_select ".pressure-fatigue-scatter", text: /6時間前と記録時点の気圧データが揃うと表示されます/
+    assert_select "svg[aria-label='直近6時間の気圧変化とだるさの散布図']", count: 0
+  end
+
   test "unknown UUID cannot read or write records" do
     base = "/u/#{SecureRandom.uuid}"
     [ base, "#{base}/daily_log", "#{base}/analysis" ].each do |path|

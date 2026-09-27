@@ -108,6 +108,9 @@ input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; marg
 .pressure-key { color: var(--accent); }
 .fatigue-key { color: #a75c46; }
 .chart-labels { color: var(--muted); margin-top: 3px; }
+.scatter-zero { stroke: #aebeb3; stroke-width: 1; stroke-dasharray: 4 4; }
+.scatter-tick { fill: var(--muted); font-size: 11px; }
+.scatter-point { fill: #c2765d; fill-opacity: .8; stroke: var(--paper); stroke-width: 1.5; }
 .empty-illustration { display: flex; justify-content: center; align-items: center; gap: 9px; height: 70px; }
 .empty-illustration span { width: 13px; border-radius: 7px; background: #d6e2cc; height: 36px; }
 .empty-illustration span:nth-child(2) { height: 56px; background: #abc19f; }
