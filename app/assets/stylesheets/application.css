@@ -114,6 +114,8 @@ input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; marg
 .correlation-summary { background: #f5f8f1; border-radius: 9px; padding: 10px 14px; margin-top: 12px; }
 .correlation-summary p { margin: 0; }
 .correlation-summary strong { color: var(--accent); font-size: 20px; font-variant-numeric: tabular-nums; }
+.correlation-guide { margin-top: 10px; }
+.correlation-guide p { margin: 4px 0; }
 .empty-illustration { display: flex; justify-content: center; align-items: center; gap: 9px; height: 70px; }
 .empty-illustration span { width: 13px; border-radius: 7px; background: #d6e2cc; height: 36px; }
 .empty-illustration span:nth-child(2) { height: 56px; background: #abc19f; }

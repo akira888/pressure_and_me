@@ -55,7 +55,7 @@
     <div class="correlation-summary">
       <% if @correlation %>
         <p>相関係数 <strong>r = <%= number_with_precision(@correlation, precision: 2) %></strong> <span class="small-note">n=<%= @scatter[:count] %></span></p>
-        <p class="small-note">負の値は、気圧が下がるほどだるさが強い方向を示します。直近20件のうち、気圧データが揃った記録から計算しています。</p>
+        <p class="small-note">直近20件のうち、気圧データが揃った記録から計算しています。</p>
       <% elsif @scatter[:count] < 3 %>
         <p class="small-note">相関係数：算出できません（n=<%= @scatter[:count] %>）。3件以上の記録が必要です。</p>
       <% else %>
@@ -67,6 +67,10 @@
     <p class="small-note">6時間前と記録時点の気圧データが揃うと表示されます。</p>
     <div class="correlation-summary"><p class="small-note">相関係数：算出できません（n=0）。3件以上の記録が必要です。</p></div>
   <% end %>
+  <div class="correlation-guide small-note">
+    <p>相関係数 r は−1〜+1。0に近いほど直線的な傾向は弱く、−1や+1に近いほど強くなります。</p>
+    <p>負の値は気圧が下がるほどだるさが強い方向、正の値は気圧が上がるほどだるさが強い方向です。例えば r=-0.47 なら、その方向の傾向はありますが、点にもばらつきがあります。強さに厳密な境界はありません。点のばらつきと件数も一緒に見てください。</p>
+  </div>
 </section>
 <section class="card">
   <div class="card-header"><h2>月次分析の対象</h2><span class="small-note">confirmed・24時間分が揃った記録</span></div>

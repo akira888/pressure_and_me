@@ -111,7 +111,10 @@ class RecordingTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".pressure-fatigue-scatter circle.scatter-point", count: 3
     assert_select ".correlation-summary", text: /r = -1\.00.*n=3/m
-    assert_select ".correlation-summary", text: /気圧が下がるほどだるさが強い方向/
+    assert_select ".correlation-guide", text: /気圧が下がるほどだるさが強い方向/
+    assert_select ".correlation-guide", text: /−1〜\+1.*0に近いほど.*−1や\+1に近いほど/m
+    assert_select ".correlation-guide", text: /負の値.*正の値.*厳密な境界はありません/m
+    assert_select ".correlation-guide", text: /r=-0\.47.*ばらつきがあります/
   end
 
   test "analysis leaves correlation undefined for too few pairs or no variation" do
@@ -125,6 +128,7 @@ class RecordingTest < ActionDispatch::IntegrationTest
 
     get "#{@base}/analysis"
     assert_select ".correlation-summary", text: /n=2.*3件以上/m
+    assert_select ".correlation-guide", text: /−1〜\+1/
 
     location.weather_samples.find_by!(observed_at: Time.zone.local(2026, 9, 19, 10),
       data_kind: :realtime).update!(pressure_msl: 1010)
