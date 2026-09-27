@@ -72,6 +72,21 @@
     <p>負の値は気圧が下がるほどだるさが強い方向、正の値は気圧が上がるほどだるさが強い方向です。例えば r=-0.47 なら、その方向の傾向はありますが、点にもばらつきがあります。強さに厳密な境界はありません。点のばらつきと件数も一緒に見てください。</p>
   </div>
 </section>
+<section class="card pressure-threshold">
+  <div class="card-header"><h2>6時間で3hPa以上下降したとき</h2><span class="small-note">直近20件・realtime・対象<%= @threshold_summary.values.sum { |group| group[:count] } %>件</span></div>
+  <p class="small-note">だるさ7以上になった記録の割合を、気圧が3hPa以上下がった場合とそれ以外で比べます。</p>
+  <div class="threshold-grid">
+    <% { falling: [ "threshold-fall", "3hPa以上下降" ], other: [ "threshold-other", "それ以外" ] }.each do |group, (css_class, label)| %>
+      <% summary = @threshold_summary.fetch(group) %>
+      <div class="threshold-group <%= css_class %>">
+        <h3><%= label %></h3>
+        <p>だるさ7以上 <strong><%= summary[:high_count] %>/<%= summary[:count] %>件</strong></p>
+        <p class="threshold-percentage"><%= summary[:percentage] ? "#{number_with_precision(summary[:percentage], precision: 1)}%" : "—" %></p>
+      </div>
+    <% end %>
+  </div>
+  <p class="small-note">「それ以外」は6時間の変化が-3hPaより大きい記録です。気圧データが欠けた記録は両群から除きます。件数が少ないと割合が変わりやすく、この比較だけで原因は判断できません。</p>
+</section>
 <section class="card">
   <div class="card-header"><h2>月次分析の対象</h2><span class="small-note">confirmed・24時間分が揃った記録</span></div>
   <p class="monthly-count"><strong><%= @monthly_condition_logs.size %></strong>件</p>

@@ -116,6 +116,12 @@ input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; marg
 .correlation-summary strong { color: var(--accent); font-size: 20px; font-variant-numeric: tabular-nums; }
 .correlation-guide { margin-top: 10px; }
 .correlation-guide p { margin: 4px 0; }
+.threshold-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+.threshold-group { background: #f5f8f1; border-radius: 9px; padding: 12px 14px; }
+.threshold-group h3 { font-size: 13px; margin: 0 0 7px; }
+.threshold-group p { font-size: 11px; color: var(--muted); margin: 0; }
+.threshold-group strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+.threshold-group .threshold-percentage { color: var(--accent); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .empty-illustration { display: flex; justify-content: center; align-items: center; gap: 9px; height: 70px; }
 .empty-illustration span { width: 13px; border-radius: 7px; background: #d6e2cc; height: 36px; }
 .empty-illustration span:nth-child(2) { height: 56px; background: #abc19f; }

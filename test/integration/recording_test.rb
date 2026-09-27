@@ -141,6 +141,41 @@ class RecordingTest < ActionDispatch::IntegrationTest
     assert_select ".correlation-summary", text: /n=3.*値にばらつきがない/m
   end
 
+  test "analysis compares high fatigue rates across the three hPa fall threshold" do
+    location = @user.create_location!(latitude: 35, longitude: 139)
+    [ [ -3, 7 ], [ -4, 8 ], [ -2, 7 ], [ 0, 3 ], [ nil, 10 ] ].each_with_index do |(change, fatigue), index|
+      hour = Time.zone.local(2026, 9, 16 + index, 10)
+      @user.condition_logs.create!(@scores.merge(recorded_at: hour + 37.minutes, fatigue: fatigue))
+      location.weather_samples.create!(observed_at: hour, data_kind: :realtime, pressure_msl: 1010)
+      if change
+        location.weather_samples.create!(observed_at: hour - 6.hours, data_kind: :realtime,
+          pressure_msl: 1010 - change)
+      end
+    end
+
+    get "#{@base}/analysis"
+
+    assert_response :success
+    assert_select ".pressure-threshold", text: /6時間で3hPa以上下降/
+    assert_select ".pressure-threshold", text: /直近20件・realtime・対象4件/
+    assert_select ".pressure-threshold .threshold-fall", text: /だるさ7以上.*2\/2件.*100\.0%/m
+    assert_select ".pressure-threshold .threshold-other", text: /だるさ7以上.*1\/2件.*50\.0%/m
+  end
+
+  test "analysis does not present an empty threshold group as zero percent" do
+    location = @user.create_location!(latitude: 35, longitude: 139)
+    hour = Time.zone.local(2026, 9, 21, 10)
+    @user.condition_logs.create!(@scores.merge(recorded_at: hour + 37.minutes, fatigue: 7))
+    location.weather_samples.create!(observed_at: hour, data_kind: :realtime, pressure_msl: 1010)
+    location.weather_samples.create!(observed_at: hour - 6.hours, data_kind: :realtime, pressure_msl: 1010)
+
+    get "#{@base}/analysis"
+
+    assert_response :success
+    assert_select ".pressure-threshold .threshold-fall", text: /0\/0件.*—/m
+    assert_select ".pressure-threshold .threshold-other", text: /1\/1件.*100\.0%/m
+  end
+
   test "unknown UUID cannot read or write records" do
     base = "/u/#{SecureRandom.uuid}"
     [ base, "#{base}/daily_log", "#{base}/analysis" ].each do |path|

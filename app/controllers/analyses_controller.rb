@@ -1,4 +1,7 @@
 class AnalysesController < UserScopedController
+  PRESSURE_DROP_THRESHOLD = -3.0
+  HIGH_FATIGUE_THRESHOLD = 7
+
   def show
     @weather_history_start = current_user.location&.weather_history_start
     @weather_history_end = Time.current
@@ -25,6 +28,7 @@ class AnalysesController < UserScopedController
     end
     @scatter = build_scatter(comparison_logs)
     @correlation = pressure_fatigue_correlation(comparison_logs)
+    @threshold_summary = build_threshold_summary(comparison_logs)
   end
 
   private
@@ -71,5 +75,16 @@ class AnalysesController < UserScopedController
     return nil if change_variance.zero? || fatigue_variance.zero?
 
     deviations.sum { |change, fatigue| change * fatigue } / Math.sqrt(change_variance * fatigue_variance)
+  end
+
+  def build_threshold_summary(logs)
+    falling, other = logs.partition { |_, change| change <= PRESSURE_DROP_THRESHOLD }
+    { falling: summarize_high_fatigue(falling), other: summarize_high_fatigue(other) }
+  end
+
+  def summarize_high_fatigue(logs)
+    count = logs.size
+    high_count = logs.count { |log, _| log.fatigue >= HIGH_FATIGUE_THRESHOLD }
+    { count: count, high_count: high_count, percentage: count.positive? ? high_count.fdiv(count) * 100 : nil }
   end
 end
