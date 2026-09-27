@@ -1,7 +1,7 @@
 # Pressure and Me
 
 気象変化と自分の体調を記録・分析するRailsアプリです。
-仕様の正本は [設計メモ](pressure_condition_app_design.md)、作業状況は [TODO](TODO.md) を参照してください。
+仕様の正本は [設計メモ](.codex/pressure_condition_app_design.md)、作業状況は [TODO](.codex/TODO.md) を参照してください。
 
 ## 開発環境
 
@@ -97,7 +97,7 @@ Weather::Importer.call(location: location, from: from, to: to, data_kind: :confi
 通信・レスポンスのエラーは例外で通知し、その取得分は保存しません。
 自動同期はPhase 4で追加した`WeatherSyncJob`が担当します。
 
-取得モデルなどの仕様とエラー種別は[設計メモ](pressure_condition_app_design.md)を参照してください。
+取得モデルなどの仕様とエラー種別は[設計メモ](.codex/pressure_condition_app_design.md)を参照してください。
 API関連のテストは固定レスポンスを使うため、ネットワーク接続なしで実行できます。
 
 ```sh

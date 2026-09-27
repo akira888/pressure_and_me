@@ -12,7 +12,7 @@
 - TDDで、失敗するテスト、実装、成功確認、整理の順に進める。
 - 作業の区切りで`PARALLEL_WORKERS=1 bin/rails test`、`bin/rubocop --cache false`、`bin/rails zeitwerk:check`を実行する。
 - 区切りごとに意味のあるコミットを作り、コミット後はIDと検証結果を共有する。
-- 仕様は`pressure_condition_app_design.md`、作業順は`TODO.md`を正本とする。
+- 仕様は`.codex/pressure_condition_app_design.md`、作業順は`.codex/TODO.md`を正本とする。
 
 ## 主要な動作
 
@@ -25,4 +25,4 @@
 
 - セッションをまたぐ作業状態は`.codex/SESSION_HANDOFF.md`に記録する。
 - 引き継ぎ資料は作業ツリーに残してよいが、コミットするかどうかはユーザーの指示に従う。
-- 実装変更を行ったら、必要に応じて`TODO.md`と設計メモも同じ変更に合わせて更新する。
+- 実装変更を行ったら、必要に応じて`.codex/TODO.md`と設計メモも同じ変更に合わせて更新する。
