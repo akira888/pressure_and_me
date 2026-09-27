@@ -1,5 +1,7 @@
 class AnalysesController < UserScopedController
   def show
+    @weather_history_start = current_user.location&.weather_history_start
+    @weather_history_end = Time.current
     @condition_logs = current_user.condition_logs.order(recorded_at: :desc).limit(20)
     @weather_metrics = @condition_logs.to_h { |log| [ log.id, log.weather_metrics ] }
     @monthly_condition_logs = current_user.condition_logs.order(recorded_at: :desc).select do |log|

@@ -41,6 +41,7 @@
       <% end %>
       <main id="main-content">
         <% if notice %><div class="notice" role="status"><span aria-hidden="true">✓</span> <%= notice %></div><% end %>
+        <% if alert %><div class="error-summary" role="alert"><%= alert %></div><% end %>
         <%= yield %>
       </main>
       <footer class="site-footer">気圧とわたし <span aria-hidden="true">·</span> 毎日の記録から、少しずつ。</footer>

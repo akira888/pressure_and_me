@@ -7,7 +7,9 @@ class WeatherBackfillJob < ApplicationJob
     locations = location_id.nil? ? Location.all : Location.where(id: location_id)
     locations.find_each do |location|
       DATA_KINDS.each do |data_kind|
-        Weather::Importer.call(location: location, from: location.weather_history_start, to: now, data_kind: data_kind)
+        from = location.weather_history_start
+        from = [ from, now.in_time_zone.beginning_of_day - 92.days ].max if data_kind == "realtime"
+        Weather::Importer.call(location: location, from: from, to: now, data_kind: data_kind)
       end
     end
   end

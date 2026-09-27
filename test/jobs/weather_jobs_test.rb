@@ -184,6 +184,45 @@ class WeatherJobsTest < ActiveSupport::TestCase
     end
   end
 
+  test "old backfill limits realtime history without truncating confirmed history" do
+    location = domain_location
+    oldest = @now - 120.days
+    location.user.condition_logs.create!(headache: 5, nausea: 5, fatigue: 5, appetite: 5, clarity: 5,
+      recorded_at: oldest)
+
+    with_importer_stub { WeatherBackfillJob.perform_now(location_id: location.id, now: @now) }
+
+    assert_equal (@now - 92.days).beginning_of_day,
+      @calls.find { |call| call[:data_kind] == "realtime" }.fetch(:from)
+    assert_equal oldest.beginning_of_hour - 24.hours,
+      @calls.find { |call| call[:data_kind] == "confirmed" }.fetch(:from)
+  end
+
+  test "manual backfill repairs gaps older than the hourly sync lookback in both series" do
+    original_importer = Weather::Importer.method(:call)
+    client = Clients::OpenMeteoClient.new(http: OpenMeteoHTTP.new)
+    @importer = ->(**arguments) { original_importer.call(**arguments, client: client) }
+    location = nil
+
+    travel_to Time.zone.local(2026, 9, 14, 12) do
+      location = domain_location
+      with_importer_stub { WeatherBackfillJob.perform_now(location_id: location.id) }
+    end
+    missing_hour = location.weather_samples.realtime.order(:observed_at).second.observed_at
+    location.weather_samples.where(observed_at: missing_hour).destroy_all
+    assert missing_hour < @now - 24.hours
+
+    with_importer_stub do
+      assert_difference "WeatherSample.count", 2 do
+        WeatherBackfillJob.perform_now(location_id: location.id)
+      end
+      assert_equal %w[confirmed realtime], location.weather_samples.where(observed_at: missing_hour).map(&:data_kind).sort
+      assert_no_difference "WeatherSample.count" do
+        WeatherBackfillJob.perform_now(location_id: location.id)
+      end
+    end
+  end
+
   private
 
   def with_importer_stub

@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     get "/daily_log", to: "daily_logs#show", as: :user_daily_log
     put "/daily_log", to: "daily_logs#update"
     get "/analysis", to: "analyses#show", as: :user_analysis
+    post "/weather_backfill", to: "weather_backfills#create", as: :user_weather_backfill
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)

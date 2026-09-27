@@ -5,6 +5,19 @@
   <p>体調と気圧の変化を振り返りましょう。</p>
   <p class="small-note">気象データは毎時更新され、記録に必要な過去分も順次取り込みます。反映まで少し時間がかかることがあります。</p>
 </section>
+<section class="card weather-backfill">
+  <div class="card-header"><h2>過去の気象データ</h2></div>
+  <% if @weather_history_start %>
+    <p>古い記録の気圧が表示されないときや、月次分析に必要なデータが不足しているときに再取得できます。</p>
+    <p class="small-note">対象期間（日本時間）：<%= @weather_history_start.in_time_zone.strftime("%Y/%m/%d %H:%M") %> 〜 <%= @weather_history_end.in_time_zone.strftime("%Y/%m/%d %H:%M") %></p>
+    <p class="small-note">月次用データは上記の期間、日次用データはそのうち最大92日前まで遡って取得します。提供元にデータがない時間は、再取得しても埋まらないことがあります。</p>
+    <%= button_to "過去の気象データを再取得", user_weather_backfill_path(uuid: current_user.uuid),
+      class: "primary-button", data: { turbo_submits_with: "予約しています…" } %>
+    <p class="small-note">取得はバックグラウンドで行います。しばらくしてからページを再読み込みしてください。</p>
+  <% else %>
+    <p class="small-note">地点が未登録のため、気象データを再取得できません。</p>
+  <% end %>
+</section>
 <% if @chart %>
   <section class="card">
     <div class="card-header"><h2>気圧とだるさ</h2><span class="small-note">直近の記録</span></div>
