@@ -11,6 +11,8 @@
 
 - TDDで、失敗するテスト、実装、成功確認、整理の順に進める。
 - 作業の区切りで`PARALLEL_WORKERS=1 bin/rails test`、`bin/rubocop --cache false`、`bin/rails zeitwerk:check`を実行する。
+- ブラウザ操作の変更では`npm ci`と`npx playwright install chromium`の後、
+  `PARALLEL_WORKERS=1 bin/rails test:system`も実行する。CapybaraからPlaywrightを使う。
 - 区切りごとに意味のあるコミットを作り、コミット後はIDと検証結果を共有する。
 - 仕様は`.codex/pressure_condition_app_design.md`、作業順は`.codex/TODO.md`を正本とする。
 

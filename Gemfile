@@ -62,7 +62,7 @@ group :development do
 end
 
 group :test do
-  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
+  # Run Rails system tests through Capybara with Playwright.
   gem "capybara"
-  gem "selenium-webdriver"
+  gem "capybara-playwright-driver", "~> 0.5.10"
 end

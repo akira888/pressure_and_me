@@ -316,6 +316,15 @@ ConditionLog: 10:37
 - グラフライブラリ
 - 分析期間、症状閾値の初期値
 
+### ブラウザ操作の検証
+
+- Railsの`ActionDispatch::SystemTestCase`とCapybaraのDSLを使い、
+  `capybara-playwright-driver`でPlaywrightのChromiumを動かす。Seleniumは使用しない。
+- 体調フォームのスライダーと保存、朝の記録の保存と再表示、分析画面への遷移と
+  散布図・閾値比較の表示を少数のsystem testで検証する。
+- 気象データはテスト内の固定データを使い、外部APIを呼ばない。
+- PlaywrightのCLIとChromiumをテスト依存として用意し、CIのsystem testジョブでも実行する。
+
 ### Phase 2で採用した実装詳細
 
 - 緯度・経度は `decimal(10, 6)`、気圧・気温・降水量は `decimal(12, 6)`。

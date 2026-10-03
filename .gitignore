@@ -30,6 +30,10 @@
 
 /public/assets
 
+# Browser test dependencies and artifacts.
+/node_modules/
+/tmp/screenshots/
+
 # Local Codex session notes are intentionally not committed.
 /.codex/local/
 
