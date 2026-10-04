@@ -87,6 +87,25 @@
   </div>
   <p class="small-note">「それ以外」は6時間の変化が-3hPaより大きい記録です。気圧データが欠けた記録は両群から除きます。件数が少ないと割合が変わりやすく、この比較だけで原因は判断できません。</p>
 </section>
+<section class="card combined-analysis">
+  <div class="card-header"><h2>気圧下降と睡眠を組み合わせて見る</h2><span class="small-note">直近20件・realtime・対象<%= @combined_summary.values.sum { |group| group[:count] } %>件</span></div>
+  <p class="small-note">6時間で3hPa以上下降したか、睡眠が6時間未満かを組み合わせ、だるさ7以上の割合を比べます。</p>
+  <table class="lag-table">
+    <thead><tr><th scope="col">気圧の変化</th><th scope="col">睡眠時間</th><th scope="col">だるさ7以上</th><th scope="col">割合</th></tr></thead>
+    <tbody>
+      <% { falling_short: [ "3hPa以上下降", "6時間未満" ], falling_long: [ "3hPa以上下降", "6時間以上" ], other_short: [ "それ以外", "6時間未満" ], other_long: [ "それ以外", "6時間以上" ] }.each do |group, (pressure, sleep)| %>
+        <% summary = @combined_summary.fetch(group) %>
+        <tr data-group="<%= group %>">
+          <th scope="row"><%= pressure %></th><td><%= sleep %></td>
+          <td><%= summary[:high_count] %>/<%= summary[:count] %>件</td>
+          <td><%= summary[:percentage] ? "#{number_with_precision(summary[:percentage], precision: 1)}%" : "—" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <p class="small-note">日本時間で体調を記録した日と同じ日付の朝の記録（前夜から当朝の睡眠）を使います。気圧や朝の記録が欠けた記録は除外します。「それ以外」は6時間の変化が-3hPaより大きい記録です。</p>
+  <p class="small-note">母数は日数ではなく体調記録数です。同日の複数の体調記録には同じ睡眠時間を使います。「—」は対象0件です。6時間は比較用の固定値です。件数と一緒に見て、割合の差だけで原因や有意な違いは判断できません。</p>
+</section>
 <section class="card lag-analysis">
   <div class="card-header"><h2>気圧変化とだるさの時間差</h2><span class="small-note">直近20件・realtime・対象<%= @lag_summary.fetch(0)[:count] %>件</span></div>
   <p class="small-note">各時間帯の6時間の気圧変化と、その後に記録しただるさの相関係数です。</p>

@@ -1,6 +1,7 @@
 class AnalysesController < UserScopedController
   PRESSURE_DROP_THRESHOLD = -3.0
   HIGH_FATIGUE_THRESHOLD = 7
+  SHORT_SLEEP_MINUTES = 360
 
   def show
     @weather_history_start = current_user.location&.weather_history_start
@@ -29,6 +30,7 @@ class AnalysesController < UserScopedController
     @scatter = build_scatter(comparison_logs)
     @correlation = pressure_fatigue_correlation(comparison_logs)
     @threshold_summary = build_threshold_summary(comparison_logs)
+    @combined_summary = build_combined_summary(comparison_logs)
     lag_logs = @condition_logs.filter_map do |log|
       changes = @weather_metrics.fetch(log.id)[:lagged_changes]
       [ log, changes ] if ConditionLog::PRESSURE_LAGS.all? { |lag| !changes[lag].nil? }
@@ -83,6 +85,21 @@ class AnalysesController < UserScopedController
     return nil if change_variance.zero? || fatigue_variance.zero?
 
     deviations.sum { |change, fatigue| change * fatigue } / Math.sqrt(change_variance * fatigue_variance)
+  end
+
+  def build_combined_summary(logs)
+    dates = logs.map { |log, _| log.recorded_at.in_time_zone("Asia/Tokyo").to_date }.uniq
+    daily_logs = current_user.daily_logs.where(date: dates).index_by(&:date)
+    groups = { falling_short: [], falling_long: [], other_short: [], other_long: [] }
+    logs.each do |log, change|
+      daily = daily_logs[log.recorded_at.in_time_zone("Asia/Tokyo").to_date]
+      next unless daily
+
+      pressure_group = change <= PRESSURE_DROP_THRESHOLD ? "falling" : "other"
+      sleep_group = daily.sleep_minutes < SHORT_SLEEP_MINUTES ? "short" : "long"
+      groups.fetch("#{pressure_group}_#{sleep_group}".to_sym) << [ log, change ]
+    end
+    groups.transform_values { |records| summarize_high_fatigue(records) }
   end
 
   def build_threshold_summary(logs)

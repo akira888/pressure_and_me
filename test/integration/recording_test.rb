@@ -202,6 +202,44 @@ class RecordingTest < ActionDispatch::IntegrationTest
     assert_select ".lag-analysis", text: /4つの時間帯すべての気圧が揃った記録/
   end
 
+  test "combined analysis matches Tokyo dates and excludes missing or other users morning records" do
+    location = @user.create_location!(latitude: 35, longitude: 139)
+    [ [ 359, -3, 7 ], [ 360, -4, 6 ], [ 0, -2, 8 ], [ 480, 0, 9 ],
+      [ 359, -3, 2 ], [ nil, -4, 10 ], [ 400, nil, 10 ] ].each_with_index do |(sleep, change, fatigue), index|
+      hour = Time.zone.local(2026, 9, 10 + index, 0)
+      @user.condition_logs.create!(@scores.merge(recorded_at: hour.utc + 30.minutes, fatigue: fatigue))
+      if sleep
+        @user.daily_logs.create!(date: hour.to_date, sleep_minutes: sleep,
+          wakeup_freshness: 5, steps: 0, drank_alcohol: false, screen_minutes: 0)
+      else
+        @other.daily_logs.create!(date: hour.to_date, sleep_minutes: 300,
+          wakeup_freshness: 5, steps: 0, drank_alcohol: false, screen_minutes: 0)
+      end
+      next unless change
+
+      location.weather_samples.create!(observed_at: hour, data_kind: :realtime, pressure_msl: 1010)
+      location.weather_samples.create!(observed_at: hour - 6.hours, data_kind: :realtime, pressure_msl: 1010 - change)
+    end
+
+    get "#{@base}/analysis"
+
+    assert_response :success
+    assert_select ".combined-analysis", text: /対象5件/
+    assert_select "tr[data-group='falling_short']", text: /1\/2件.*50\.0%/m
+    assert_select "tr[data-group='falling_long']", text: /0\/1件.*0\.0%/m
+    assert_select "tr[data-group='other_short']", text: /1\/1件.*100\.0%/m
+    assert_select "tr[data-group='other_long']", text: /1\/1件.*100\.0%/m
+  end
+
+  test "combined analysis shows unavailable rates when morning records are missing" do
+    get "#{@base}/analysis"
+
+    assert_select ".combined-analysis", text: /対象0件/
+    assert_select ".combined-analysis tbody tr", count: 4
+    assert_select ".combined-analysis tbody td", text: "—", count: 4
+    assert_select ".combined-analysis", text: /体調記録数/
+  end
+
   test "unknown UUID cannot read or write records" do
     base = "/u/#{SecureRandom.uuid}"
     [ base, "#{base}/daily_log", "#{base}/analysis" ].each do |path|

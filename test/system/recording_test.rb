@@ -41,6 +41,8 @@ class RecordingTest < ApplicationSystemTestCase
     location = @user.create_location!(latitude: 35, longitude: 139)
     [ [ 19, 1014, 8 ], [ 20, 1010, 4 ] ].each do |day, previous_pressure, fatigue|
       hour = Time.zone.local(2026, 9, day, 10)
+      @user.daily_logs.create!(date: hour.to_date, sleep_minutes: day == 19 ? 300 : 420,
+        wakeup_freshness: 5, steps: 0, drank_alcohol: false, screen_minutes: 0)
       @user.condition_logs.create!(recorded_at: hour + 37.minutes,
         headache: 5, nausea: 5, fatigue: fatigue, appetite: 5, clarity: 5)
       location.weather_samples.create!(observed_at: hour, data_kind: :realtime, pressure_msl: 1010)
@@ -59,6 +61,17 @@ class RecordingTest < ApplicationSystemTestCase
     within ".threshold-other" do
       assert_text "0/1件"
       assert_text "0.0%"
+    end
+    within ".combined-analysis" do
+      assert_selector "tbody tr", count: 4
+      within "tr[data-group='falling_short']" do
+        assert_text "1/1件"
+        assert_text "100.0%"
+      end
+      within "tr[data-group='other_long']" do
+        assert_text "0/1件"
+        assert_text "0.0%"
+      end
     end
     within ".lag-analysis" do
       assert_selector "tbody tr", count: 4
