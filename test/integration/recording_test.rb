@@ -176,6 +176,32 @@ class RecordingTest < ActionDispatch::IntegrationTest
     assert_select ".pressure-threshold .threshold-other", text: /1\/1件.*100\.0%/m
   end
 
+  test "lag analysis compares the same complete records at four earlier windows" do
+    location = @user.create_location!(latitude: 35, longitude: 139)
+    [ [ 2, -3, 3, 1 ], [ 5, 0, 0, 2 ], [ 8, 3, -3, 3 ], [ 10, 4, -4, nil ] ].each_with_index do |(fatigue, current_change, earlier_change, oldest_change), index|
+      hour = Time.zone.local(2026, 9, 17 + index, 10)
+      @user.condition_logs.create!(@scores.merge(recorded_at: hour + 37.minutes, fatigue: fatigue))
+      pressures = { 0 => 1010 + current_change, 3 => 1010, 6 => 1010,
+        9 => 1010 - earlier_change, 12 => 1010, 18 => oldest_change && 1010 - oldest_change }
+      pressures.each do |hours_ago, pressure|
+        next unless pressure
+
+        location.weather_samples.create!(observed_at: hour - hours_ago.hours,
+          data_kind: :realtime, pressure_msl: pressure)
+      end
+    end
+
+    get "#{@base}/analysis"
+
+    assert_response :success
+    assert_select ".lag-analysis", text: /直近20件・realtime・対象3件/
+    assert_select ".lag-analysis tr[data-lag='0']", text: /0〜6時間前.*1\.00.*n=3/m
+    assert_select ".lag-analysis tr[data-lag='3']", text: /3〜9時間前.*-1\.00.*n=3/m
+    assert_select ".lag-analysis tr[data-lag='6']", text: /6〜12時間前.*—.*n=3/m
+    assert_select ".lag-analysis tr[data-lag='12']", text: /12〜18時間前.*1\.00.*n=3/m
+    assert_select ".lag-analysis", text: /4つの時間帯すべての気圧が揃った記録/
+  end
+
   test "unknown UUID cannot read or write records" do
     base = "/u/#{SecureRandom.uuid}"
     [ base, "#{base}/daily_log", "#{base}/analysis" ].each do |path|

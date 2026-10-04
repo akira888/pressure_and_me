@@ -87,6 +87,25 @@
   </div>
   <p class="small-note">「それ以外」は6時間の変化が-3hPaより大きい記録です。気圧データが欠けた記録は両群から除きます。件数が少ないと割合が変わりやすく、この比較だけで原因は判断できません。</p>
 </section>
+<section class="card lag-analysis">
+  <div class="card-header"><h2>気圧変化とだるさの時間差</h2><span class="small-note">直近20件・realtime・対象<%= @lag_summary.fetch(0)[:count] %>件</span></div>
+  <p class="small-note">各時間帯の6時間の気圧変化と、その後に記録しただるさの相関係数です。</p>
+  <table class="lag-table">
+    <thead><tr><th scope="col">変化した時間帯</th><th scope="col">相関係数</th><th scope="col">母数</th></tr></thead>
+    <tbody>
+      <% ConditionLog::PRESSURE_LAGS.each do |lag| %>
+        <% summary = @lag_summary.fetch(lag) %>
+        <tr data-lag="<%= lag %>">
+          <th scope="row"><%= lag %>〜<%= lag + 6 %>時間前</th>
+          <td><%= summary[:correlation] ? number_with_precision(summary[:correlation], precision: 2) : "—" %></td>
+          <td>n=<%= summary[:count] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <p class="small-note">4つの時間帯すべての気圧が揃った記録だけを使うため、母数は同じです。「—」は3件未満、またはいずれかの値にばらつきがなく計算できないことを示します。</p>
+  <p class="small-note">負の値は、その時間帯で気圧が下がった記録ほど、記録時点のだるさが強い方向です。時間差による原因や有意な違いを示すものではありません。</p>
+</section>
 <section class="card">
   <div class="card-header"><h2>月次分析の対象</h2><span class="small-note">confirmed・24時間分が揃った記録</span></div>
   <p class="monthly-count"><strong><%= @monthly_condition_logs.size %></strong>件</p>

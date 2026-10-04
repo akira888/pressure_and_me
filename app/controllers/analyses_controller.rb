@@ -29,6 +29,14 @@ class AnalysesController < UserScopedController
     @scatter = build_scatter(comparison_logs)
     @correlation = pressure_fatigue_correlation(comparison_logs)
     @threshold_summary = build_threshold_summary(comparison_logs)
+    lag_logs = @condition_logs.filter_map do |log|
+      changes = @weather_metrics.fetch(log.id)[:lagged_changes]
+      [ log, changes ] if ConditionLog::PRESSURE_LAGS.all? { |lag| !changes[lag].nil? }
+    end
+    @lag_summary = ConditionLog::PRESSURE_LAGS.to_h do |lag|
+      pairs = lag_logs.map { |log, changes| [ log, changes.fetch(lag) ] }
+      [ lag, { correlation: pressure_fatigue_correlation(pairs), count: pairs.size } ]
+    end
   end
 
   private

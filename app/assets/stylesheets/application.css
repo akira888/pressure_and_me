@@ -122,6 +122,11 @@ input[type=radio] { accent-color: var(--accent); width: 16px; height: 16px; marg
 .threshold-group p { font-size: 11px; color: var(--muted); margin: 0; }
 .threshold-group strong { color: var(--ink); font-variant-numeric: tabular-nums; }
 .threshold-group .threshold-percentage { color: var(--accent); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.lag-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-variant-numeric: tabular-nums; }
+.lag-table th, .lag-table td { border-bottom: 1px solid var(--line); padding: 9px 4px; text-align: left; }
+.lag-table thead th { color: var(--muted); font-size: 11px; font-weight: 500; }
+.lag-table tbody th { font-size: 12px; font-weight: 600; }
+.lag-table tbody td { color: var(--accent); font-size: 13px; font-weight: 600; }
 .empty-illustration { display: flex; justify-content: center; align-items: center; gap: 9px; height: 70px; }
 .empty-illustration span { width: 13px; border-radius: 7px; background: #d6e2cc; height: 36px; }
 .empty-illustration span:nth-child(2) { height: 56px; background: #abc19f; }

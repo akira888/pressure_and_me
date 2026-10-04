@@ -39,6 +39,19 @@ class ConditionLogAnalysisTest < ActiveSupport::TestCase
     assert_equal 1020.0, @log.weather_metrics(data_kind: :confirmed)[:pressure]
   end
 
+  test "measures six hour pressure changes ending at each earlier lag" do
+    { 0 => 1008, 3 => 1007, 6 => 1012, 9 => 1009, 12 => 1010, 18 => 1013 }.each do |hours_ago, pressure|
+      add_sample(hours_ago, pressure)
+    end
+
+    assert_equal({ 0 => -4.0, 3 => -2.0, 6 => 2.0, 12 => -3.0 },
+      @log.weather_metrics[:lagged_changes])
+    @location.weather_samples.find_by!(observed_at: @recorded_at.beginning_of_hour - 9.hours,
+      data_kind: :realtime).destroy!
+    assert_nil @log.weather_metrics[:lagged_changes][3]
+    assert_equal(-4.0, @log.weather_metrics[:lagged_changes][0])
+  end
+
   test "confirmed monthly analysis requires every hour in the 24 hour window" do
     0.upto(24) do |hours_ago|
       add_sample(hours_ago, 1010 + hours_ago, :confirmed)

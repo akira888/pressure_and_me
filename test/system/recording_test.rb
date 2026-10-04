@@ -60,5 +60,9 @@ class RecordingTest < ApplicationSystemTestCase
       assert_text "0/1件"
       assert_text "0.0%"
     end
+    within ".lag-analysis" do
+      assert_selector "tbody tr", count: 4
+      assert_text "4つの時間帯すべての気圧が揃った記録"
+    end
   end
 end
