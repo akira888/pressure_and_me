@@ -64,5 +64,5 @@ end
 group :test do
   # Run Rails system tests through Capybara with Playwright.
   gem "capybara"
-  gem "capybara-playwright-driver", "~> 0.5.10"
+  gem "capybara-playwright-driver", "~> 0.5.13"
 end
